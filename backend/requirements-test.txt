@@ -1,0 +1,71 @@
+# Dependências de Testes - Enterprise Grade
+# Nível superior aos top 10 players do mercado
+
+# Framework de testes
+pytest==7.4.3
+pytest-cov==4.1.0           # Cobertura de código
+pytest-xdist==3.5.0         # Paralelização de testes
+pytest-timeout==2.2.0       # Timeout para testes
+pytest-randomly==3.15.0     # Ordem aleatória (evita dependências)
+pytest-mock==3.12.0         # Mocking avançado
+pytest-benchmark==4.0.0     # Benchmarks de performance
+pytest-asyncio==0.23.2      # Suporte a testes assíncronos
+
+# Test client
+httpx==0.25.1               # Cliente HTTP assíncrono
+requests==2.31.0            # Cliente HTTP (já no requirements.txt)
+
+# Factories e fixtures
+factory-boy==3.3.0          # Factory pattern para testes
+faker==20.1.0               # Dados falsos realistas
+
+# Mocking e stubbing
+responses==0.24.1           # Mock de requests HTTP
+freezegun==1.4.0            # Controle de tempo em testes
+vcrpy==5.1.0                # Gravação de requests HTTP
+
+# Code quality
+black==23.12.1              # Formatação de código
+isort==5.13.2               # Ordenação de imports
+flake8==6.1.0               # Linting
+mypy==1.7.1                 # Type checking
+pylint==3.0.3               # Análise estática
+bandit==1.7.6               # Security linting
+
+# Coverage reporting
+coverage[toml]==7.3.4       # Core coverage
+codecov==2.1.13             # Upload para Codecov
+
+# Performance profiling
+py-spy==0.3.14              # Profiler de performance
+memory-profiler==0.61.0     # Profiler de memória
+pytest-profiling==1.7.0     # Profiling em testes
+
+# Security testing
+safety==2.3.5               # Vulnerabilidades em dependências
+semgrep==1.50.0             # SAST (Static Analysis Security Testing)
+
+# Load testing (opcional, para testes de carga)
+locust==2.19.0              # Load testing
+pytest-stress==1.0.1        # Stress testing
+
+# Database testing
+pytest-postgresql==5.0.0    # PostgreSQL fixtures
+sqlalchemy-utils==0.41.1    # Utilitários para SQLAlchemy
+
+# Assertions avançadas
+pytest-assume==2.4.3        # Múltiplas assertions
+assertpy==1.1               # Assertions fluentes
+
+# Reporting
+pytest-html==4.1.1          # Relatórios HTML
+pytest-json-report==1.5.0   # Relatórios JSON
+allure-pytest==2.13.2       # Relatórios Allure (enterprise)
+
+# CI/CD
+tox==4.11.4                 # Automação de testes multi-ambiente
+nox==2023.4.22              # Alternativa ao tox
+
+# Debugging
+pytest-pdb==0.3.1           # Debugging interativo
+ipdb==0.13.13               # IPython debugger

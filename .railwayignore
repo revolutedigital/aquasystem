@@ -1,0 +1,65 @@
+# Railway Ignore File
+# Arquivos e pastas que não devem ser incluídos no deploy
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+htmlcov/
+.coverage
+*.cover
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Documentation (opcional - comentar se quiser incluir)
+*.md
+!README.md
+
+# Tests (opcional - comentar se quiser rodar testes no Railway)
+backend/tests/
+**/test_*.py
+pytest.ini
+
+# Logs
+*.log
+logs/
+
+# Backups
+backups/
+*.sql
+*.sql.gz
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Node modules (se existir)
+node_modules/
+
+# Docker (Railway usa próprio Docker)
+docker-compose.yml
+docker-compose.*.yml
+.dockerignore
