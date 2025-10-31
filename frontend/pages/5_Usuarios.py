@@ -9,6 +9,7 @@ import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from styles import get_global_styles, get_custom_components
 from streamlit_hacks import get_streamlit_ui_hacks, get_improved_contrast_css
+from auth_utils import require_authentication, get_auth_headers, hide_streamlit_app_from_sidebar
 
 # Configuração da página
 st.set_page_config(
@@ -21,6 +22,9 @@ st.set_page_config(
 st.markdown(get_global_styles(), unsafe_allow_html=True)
 st.markdown(get_streamlit_ui_hacks(), unsafe_allow_html=True)
 st.markdown(get_improved_contrast_css(), unsafe_allow_html=True)
+
+# Esconder 'streamlit app' do menu
+hide_streamlit_app_from_sidebar()
 
 # Obter componentes customizados
 components = get_custom_components()

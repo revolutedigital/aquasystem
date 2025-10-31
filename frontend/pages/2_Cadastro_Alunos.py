@@ -10,6 +10,7 @@ import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from styles import get_global_styles, get_custom_components, create_pagination, render_pagination_controls
 from streamlit_hacks import get_improved_contrast_css
+from auth_utils import require_authentication, get_auth_headers, hide_streamlit_app_from_sidebar
 
 # Configuração da página
 st.set_page_config(
@@ -18,29 +19,18 @@ st.set_page_config(
     layout="wide"
 )
 
+# Verificar autenticação PRIMEIRO
+require_authentication()
+
 # Aplicar estilos globais otimizados
 st.markdown(get_global_styles(), unsafe_allow_html=True)
 st.markdown(get_improved_contrast_css(), unsafe_allow_html=True)
 
+# Esconder 'streamlit app' do menu
+hide_streamlit_app_from_sidebar()
+
 # Obter componentes customizados
 components = get_custom_components()
-
-# CSS para esconder "streamlit app"
-st.markdown("""
-    <style>
-    /* Esconder primeiro item da lista de navegação */
-    [data-testid="stSidebarNav"] ul li:first-child,
-    [data-testid="stSidebarNav"] > div > ul > li:first-child {
-        display: none !important;
-    }
-
-    /* Ajustar espaçamento */
-    [data-testid="stSidebarNav"] {
-        padding-top: 1rem !important;
-        margin-top: 0 !important;
-    }
-    </style>
-""", unsafe_allow_html=True)
 
 # CSS adicional específico desta página
 st.markdown("""
@@ -69,20 +59,6 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 API_URL = os.getenv("API_URL", "http://backend:9000")
-
-# Verificar autenticação - Redirecionar para login se necessário
-if "access_token" not in st.session_state or st.session_state.access_token is None:
-    st.error("🔒 Acesso negado. Por favor, faça login primeiro.")
-    st.info("👉 Clique em 'streamlit app' no menu lateral para fazer login")
-    st.stop()
-
-# Função auxiliar para headers autenticados
-def get_auth_headers():
-    """Retorna headers com token de autenticação"""
-    return {
-        "Authorization": f"Bearer {st.session_state.access_token}",
-        "Content-Type": "application/json"
-    }
 
 # Função para validar telefone brasileiro
 def validar_telefone(telefone: str) -> bool:
