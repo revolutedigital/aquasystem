@@ -18,14 +18,26 @@ router = APIRouter(
 )
 
 
-@router.post("/alunos", response_model=AlunoResponse, status_code=201)
+@router.post("/alunos", response_model=AlunoResponse, status_code=200)
 async def criar_aluno(aluno: AlunoCreate, db: Session = Depends(get_db)):
     """Criar novo aluno"""
-    db_aluno = Aluno(**aluno.model_dump())
-    db.add(db_aluno)
-    db.commit()
-    db.refresh(db_aluno)
-    return db_aluno
+    try:
+        print(f"📝 Criando aluno: {aluno.nome_completo}")
+        print(f"   Dados: {aluno.model_dump()}")
+        db_aluno = Aluno(**aluno.model_dump())
+        db.add(db_aluno)
+        db.commit()
+        db.refresh(db_aluno)
+        print(f"✅ Aluno criado com sucesso: ID {db_aluno.id}")
+        return db_aluno
+    except Exception as e:
+        print(f"❌ Erro ao criar aluno: {str(e)}")
+        print(f"   Tipo do erro: {type(e).__name__}")
+        db.rollback()
+        raise HTTPException(
+            status_code=500,
+            detail=f"Erro ao criar aluno: {str(e)}"
+        )
 
 
 @router.get("/alunos", response_model=List[AlunoResponse])
