@@ -94,17 +94,33 @@ def validar_telefone(telefone: str) -> bool:
     # Verifica se tem 10 ou 11 dígitos
     return len(numeros) in [10, 11]
 
-# Função para formatar telefone
+# Função para formatar telefone automaticamente
 def formatar_telefone(telefone: str) -> str:
-    """Formata telefone para padrão brasileiro"""
+    """Formata telefone para padrão brasileiro automaticamente"""
     if not telefone:
         return ""
+    # Remove tudo que não é número
     numeros = re.sub(r'\D', '', telefone)
-    if len(numeros) == 11:
-        return f"({numeros[:2]}) {numeros[2:7]}-{numeros[7:]}"
-    elif len(numeros) == 10:
+
+    # Formata automaticamente conforme digita
+    if len(numeros) == 0:
+        return ""
+    elif len(numeros) <= 2:
+        return f"({numeros}"
+    elif len(numeros) <= 6:
+        return f"({numeros[:2]}) {numeros[2:]}"
+    elif len(numeros) <= 10:
         return f"({numeros[:2]}) {numeros[2:6]}-{numeros[6:]}"
-    return telefone
+    else:
+        # Celular com 11 dígitos
+        return f"({numeros[:2]}) {numeros[2:7]}-{numeros[7:11]}"
+
+# Função para aplicar máscara ao telefone (apenas números)
+def aplicar_mascara_telefone(telefone: str) -> str:
+    """Remove formatação e retorna apenas números"""
+    if not telefone:
+        return ""
+    return re.sub(r'\D', '', telefone)
 
 # Header
 st.title("📝 Gestão de Alunos")
@@ -119,7 +135,11 @@ tab1, tab2, tab3 = st.tabs(["➕ Novo Aluno", "📋 Listar Alunos", "✏️ Busc
 with tab1:
     st.header("Cadastrar Novo Aluno")
 
-    with st.form("form_novo_aluno", clear_on_submit=True):
+    # Inicializar session_state para preservar dados
+    if 'form_data_aluno' not in st.session_state:
+        st.session_state.form_data_aluno = {}
+
+    with st.form("form_novo_aluno", clear_on_submit=False):
         # Dados pessoais
         st.subheader("👤 Dados Pessoais")
         col1, col2 = st.columns(2)
@@ -127,33 +147,47 @@ with tab1:
         with col1:
             nome_completo = st.text_input(
                 "Nome Completo *",
+                value=st.session_state.form_data_aluno.get('nome_completo', ''),
                 placeholder="Ex: João Silva Santos",
                 help="Nome completo do aluno"
             )
-            telefone_whatsapp = st.text_input(
-                "Telefone/WhatsApp",
-                placeholder="(11) 99999-9999",
-                help="Telefone com DDD para contato via WhatsApp"
+            telefone_whatsapp_raw = st.text_input(
+                "Telefone/WhatsApp (apenas números)",
+                value=st.session_state.form_data_aluno.get('telefone_whatsapp', ''),
+                placeholder="11999999999",
+                help="Digite apenas os números (DDD + telefone). A formatação é automática!",
+                max_chars=11
             )
+            # Aplicar formatação automática
+            telefone_whatsapp = formatar_telefone(telefone_whatsapp_raw)
+            if telefone_whatsapp_raw:
+                st.caption(f"📱 Formato: {telefone_whatsapp}")
+
             responsavel = st.text_input(
                 "Nome do Responsável",
+                value=st.session_state.form_data_aluno.get('responsavel', ''),
                 placeholder="Para menores de idade",
                 help="Deixe em branco se o aluno for maior de idade"
             )
 
         with col2:
+            tipo_aula_index = 0 if st.session_state.form_data_aluno.get('tipo_aula', 'natacao') == 'natacao' else 1
             tipo_aula = st.selectbox(
                 "Tipo de Aula *",
                 options=["natacao", "hidroginastica"],
+                index=tipo_aula_index,
                 format_func=lambda x: "Natação" if x == "natacao" else "Hidroginástica",
                 help="Modalidade que o aluno irá praticar"
             )
             data_inicio_contrato = st.date_input(
                 "Data de Início do Contrato",
-                value=date.today(),
+                value=st.session_state.form_data_aluno.get('data_inicio_contrato', date.today()),
                 help="Data de início das aulas"
             )
-            ativo = st.checkbox("Aluno Ativo", value=True)
+            ativo = st.checkbox(
+                "Aluno Ativo",
+                value=st.session_state.form_data_aluno.get('ativo', True)
+            )
 
         # Dados financeiros
         st.subheader("💰 Dados Financeiros")
@@ -163,7 +197,7 @@ with tab1:
             valor_mensalidade = st.number_input(
                 "Valor da Mensalidade (R$) *",
                 min_value=0.0,
-                value=150.0,
+                value=float(st.session_state.form_data_aluno.get('valor_mensalidade', 150.0)),
                 step=10.0,
                 format="%.2f",
                 help="Valor mensal a ser pago pelo aluno"
@@ -174,13 +208,14 @@ with tab1:
                 "Dia do Vencimento *",
                 min_value=1,
                 max_value=31,
-                value=10,
+                value=int(st.session_state.form_data_aluno.get('dia_vencimento', 10)),
                 help="Dia do mês em que a mensalidade vence"
             )
 
         # Observações
         observacoes = st.text_area(
             "Observações",
+            value=st.session_state.form_data_aluno.get('observacoes', ''),
             placeholder="Informações adicionais sobre o aluno (opcional)",
             help="Restrições médicas, observações importantes, etc."
         )
@@ -189,18 +224,32 @@ with tab1:
         submitted = st.form_submit_button("✅ Cadastrar Aluno", type="primary", use_container_width=True)
 
         if submitted:
+            # Salvar dados no session_state para preservar em caso de erro
+            st.session_state.form_data_aluno = {
+                'nome_completo': nome_completo,
+                'telefone_whatsapp': telefone_whatsapp_raw,
+                'responsavel': responsavel,
+                'tipo_aula': tipo_aula,
+                'data_inicio_contrato': data_inicio_contrato,
+                'ativo': ativo,
+                'valor_mensalidade': valor_mensalidade,
+                'dia_vencimento': dia_vencimento,
+                'observacoes': observacoes
+            }
+
             # Validações
             erros = []
 
             if not nome_completo or len(nome_completo.strip()) == 0:
                 erros.append("Nome completo é obrigatório")
 
-            if telefone_whatsapp and not validar_telefone(telefone_whatsapp):
-                erros.append("Telefone inválido. Use o formato (XX) XXXXX-XXXX")
+            if telefone_whatsapp_raw and not validar_telefone(telefone_whatsapp_raw):
+                erros.append("Telefone inválido. Digite 10 ou 11 números (DDD + telefone)")
 
             if erros:
                 for erro in erros:
                     st.error(f"❌ {erro}")
+                st.warning("⚠️ Corrija os erros acima. Seus dados foram preservados!")
             else:
                 # Preparar dados
                 aluno_data = {
@@ -211,7 +260,7 @@ with tab1:
                     "dia_vencimento": int(dia_vencimento),
                     "data_inicio_contrato": str(data_inicio_contrato),
                     "ativo": ativo,
-                    "telefone_whatsapp": formatar_telefone(telefone_whatsapp) if telefone_whatsapp else None,
+                    "telefone_whatsapp": telefone_whatsapp if telefone_whatsapp_raw else None,
                     "observacoes": observacoes.strip() if observacoes else None
                 }
 
@@ -222,13 +271,19 @@ with tab1:
                     if response.status_code == 200:
                         st.success(f"✅ Aluno {nome_completo} cadastrado com sucesso!")
                         st.balloons()
+                        # Limpar dados apenas em caso de sucesso
+                        st.session_state.form_data_aluno = {}
+                        st.rerun()
                     else:
                         st.error(f"❌ Não foi possível salvar os dados. Tente novamente.")
+                        st.warning("⚠️ Seus dados foram preservados. Corrija e tente novamente!")
 
                 except requests.exceptions.ConnectionError:
                     st.error("❌ Sistema temporariamente indisponível. Tente novamente em alguns instantes.")
+                    st.warning("⚠️ Seus dados foram preservados!")
                 except Exception as e:
                     st.error(f"❌ Erro inesperado ao processar solicitação.")
+                    st.warning("⚠️ Seus dados foram preservados!")
 
 # TAB 2 - LISTAR ALUNOS
 with tab2:
@@ -361,10 +416,22 @@ with tab3:
 
                     with col1:
                         nome_completo = st.text_input("Nome Completo *", value=aluno.get('nome_completo', ''))
-                        telefone_whatsapp = st.text_input(
-                            "Telefone/WhatsApp",
-                            value=aluno.get('telefone_whatsapp', '') or ''
+                        # Extrair apenas números do telefone salvo
+                        telefone_salvo = aluno.get('telefone_whatsapp', '') or ''
+                        telefone_numeros = aplicar_mascara_telefone(telefone_salvo)
+
+                        telefone_whatsapp_raw = st.text_input(
+                            "Telefone/WhatsApp (apenas números)",
+                            value=telefone_numeros,
+                            placeholder="11999999999",
+                            help="Digite apenas os números (DDD + telefone). A formatação é automática!",
+                            max_chars=11
                         )
+                        # Mostrar formatação
+                        telefone_whatsapp = formatar_telefone(telefone_whatsapp_raw)
+                        if telefone_whatsapp_raw:
+                            st.caption(f"📱 Formato: {telefone_whatsapp}")
+
                         responsavel = st.text_input(
                             "Nome do Responsável",
                             value=aluno.get('responsavel', '') or ''
@@ -430,8 +497,9 @@ with tab3:
 
                     # Processar atualização
                     if update_btn:
-                        if telefone_whatsapp and not validar_telefone(telefone_whatsapp):
-                            st.error("❌ Telefone inválido. Use o formato (XX) XXXXX-XXXX")
+                        if telefone_whatsapp_raw and not validar_telefone(telefone_whatsapp_raw):
+                            st.error("❌ Telefone inválido. Digite 10 ou 11 números (DDD + telefone)")
+                            st.warning("⚠️ Corrija o telefone e tente novamente. Os dados estão preservados!")
                         else:
                             aluno_data = {
                                 "nome_completo": nome_completo.strip(),
@@ -441,7 +509,7 @@ with tab3:
                                 "dia_vencimento": int(dia_vencimento),
                                 "data_inicio_contrato": str(data_inicio_contrato),
                                 "ativo": ativo,
-                                "telefone_whatsapp": formatar_telefone(telefone_whatsapp) if telefone_whatsapp else None,
+                                "telefone_whatsapp": telefone_whatsapp if telefone_whatsapp_raw else None,
                                 "observacoes": observacoes.strip() if observacoes else None
                             }
 
@@ -458,9 +526,11 @@ with tab3:
                                     st.rerun()
                                 else:
                                     st.error(f"❌ Não foi possível atualizar os dados.")
+                                    st.warning("⚠️ Seus dados estão preservados. Tente novamente!")
 
                             except Exception as e:
                                 st.error(f"❌ Sistema temporariamente indisponível.")
+                                st.warning("⚠️ Seus dados estão preservados!")
 
                     # Processar inativação (soft delete)
                     if delete_btn:
