@@ -7,20 +7,21 @@ import streamlit as st
 def require_authentication():
     """
     Verifica se o usuário está autenticado.
-    Se não estiver, mostra mensagem e redireciona para login.
+    Se não estiver, mostra mensagem e para a execução.
     Use no início de cada página protegida.
     """
     if "access_token" not in st.session_state or st.session_state.access_token is None:
         st.error("🔒 Acesso negado")
         st.warning("⚠️ Você precisa fazer login para acessar esta página.")
+        st.info("💡 **Dica:** Volte para a página inicial no menu lateral e faça login")
 
-        # Botão para voltar ao login
-        col1, col2, col3 = st.columns([1, 1, 1])
-        with col2:
-            if st.button("🔓 Fazer Login", type="primary", use_container_width=True):
-                st.switch_page("streamlit_app.py")
+        # Criar um link visual para facilitar
+        st.markdown("""
+        <div style="text-align: center; margin-top: 2rem;">
+            <p style="font-size: 1.2rem;">👈 Use o menu lateral e clique em <strong>streamlit app</strong> ou <strong>Home</strong> para fazer login</p>
+        </div>
+        """, unsafe_allow_html=True)
 
-        st.info("💡 **Dica:** Use a página inicial (Home) no menu lateral para fazer login")
         st.stop()
 
 
