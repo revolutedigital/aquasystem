@@ -4,14 +4,9 @@ const nextConfig = {
   images: {
     domains: ['localhost'],
   },
-  async rewrites() {
-    return [
-      {
-        source: '/api/:path*',
-        destination: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9000'}/api/:path*`,
-      },
-    ];
-  },
+  // Note: API URL is configured in .env.local
+  // Default: http://localhost:8000/api
+  // Production: set NEXT_PUBLIC_API_URL in Railway environment variables
 }
 
 module.exports = nextConfig

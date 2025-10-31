@@ -1,7 +1,8 @@
 import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
 import { User } from '@/types'
 import { authAPI } from '@/lib/api'
-import { toast } from 'react-hot-toast'
+import toast from 'react-hot-toast'
 
 interface AuthState {
   user: User | null
@@ -16,68 +17,64 @@ interface AuthState {
   setUser: (user: User | null) => void
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
-  user: null,
-  token: null,
-  isAuthenticated: false,
-  isLoading: true,
-
-  login: async (email: string, password: string) => {
-    try {
-      const response = await authAPI.login(email, password)
-
-      // Salvar token e user no localStorage
-      localStorage.setItem('access_token', response.access_token)
-      localStorage.setItem('user', JSON.stringify(response.user))
-
-      // Atualizar store
-      set({
-        user: response.user,
-        token: response.access_token,
-        isAuthenticated: true,
-      })
-
-      toast.success('Login realizado com sucesso!')
-      return true
-    } catch (error: any) {
-      const message = error.response?.data?.detail || 'Erro ao fazer login'
-      toast.error(message)
-      return false
-    }
-  },
-
-  logout: () => {
-    authAPI.logout()
-    set({
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set) => ({
       user: null,
       token: null,
       isAuthenticated: false,
-    })
-    toast.success('Logout realizado com sucesso!')
-  },
+      isLoading: false,
 
-  checkAuth: () => {
-    const token = localStorage.getItem('access_token')
-    const userStr = localStorage.getItem('user')
+      login: async (email: string, password: string) => {
+        set({ isLoading: true })
+        try {
+          const response = await authAPI.login(email, password)
+          const { access_token, user } = response.data
 
-    if (token && userStr) {
-      try {
-        const user = JSON.parse(userStr)
+          set({
+            user: user,
+            token: access_token,
+            isAuthenticated: true,
+            isLoading: false,
+          })
+
+          toast.success('Login realizado com sucesso!')
+          return true
+        } catch (error) {
+          set({ isLoading: false })
+          const message = error instanceof Error
+            ? error.message
+            : (error as { response?: { data?: { detail?: string } } })?.response?.data?.detail || 'Erro ao fazer login'
+          toast.error(message)
+          return false
+        }
+      },
+
+      logout: () => {
         set({
-          user,
-          token,
-          isAuthenticated: true,
-          isLoading: false,
+          user: null,
+          token: null,
+          isAuthenticated: false,
         })
-      } catch {
-        set({ isLoading: false })
-      }
-    } else {
-      set({ isLoading: false })
-    }
-  },
+        toast.success('Logout realizado com sucesso!')
+      },
 
-  setUser: (user: User | null) => {
-    set({ user })
-  },
-}))
+      checkAuth: () => {
+        // Zustand persist will automatically restore state
+        set({ isLoading: false })
+      },
+
+      setUser: (user: User | null) => {
+        set({ user })
+      },
+    }),
+    {
+      name: 'auth-storage',
+      partialize: (state) => ({
+        user: state.user,
+        token: state.token,
+        isAuthenticated: state.isAuthenticated,
+      }),
+    }
+  )
+)

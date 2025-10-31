@@ -5,8 +5,8 @@ import { DashboardLayout } from '@/components/layout/DashboardLayout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { alunosAPI, pagamentosAPI } from '@/lib/api'
 import { formatCurrency } from '@/lib/utils'
-import { Users, DollarSign, AlertCircle, TrendingUp } from 'lucide-react'
-import { Aluno } from '@/types'
+import { Users, DollarSign, AlertCircle, TrendingUp, Calendar } from 'lucide-react'
+import { Aluno, Pagamento } from '@/types'
 
 export default function DashboardPage() {
   const [stats, setStats] = useState({
@@ -27,7 +27,7 @@ export default function DashboardPage() {
         alunosAPI.list(),
         alunosAPI.getInadimplentes(),
         pagamentosAPI.list(),
-      ])
+      ]) as [Aluno[], Aluno[], Pagamento[]]
 
       const alunosAtivos = alunos.filter((a: Aluno) => a.ativo).length
 
@@ -35,8 +35,8 @@ export default function DashboardPage() {
       const hoje = new Date()
       const trintaDiasAtras = new Date(hoje.getTime() - 30 * 24 * 60 * 60 * 1000)
       const receitaMensal = pagamentos
-        .filter((p: any) => new Date(p.data_pagamento) >= trintaDiasAtras)
-        .reduce((acc: number, p: any) => acc + p.valor, 0)
+        .filter((p: Pagamento) => new Date(p.data_pagamento) >= trintaDiasAtras)
+        .reduce((acc: number, p: Pagamento) => acc + p.valor, 0)
 
       setStats({
         totalAlunos: alunos.length,
