@@ -39,17 +39,27 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # Configurar CORS - RESTRITO (segurança)
 # Definir origens permitidas
-ALLOWED_ORIGINS = os.getenv(
+ALLOWED_ORIGINS_STR = os.getenv(
     "ALLOWED_ORIGINS",
     "http://localhost:9001,http://localhost:8501,http://frontend:9001"
-).split(",")
+)
+
+# Converter string para lista e remover espaços
+ALLOWED_ORIGINS = [origin.strip() for origin in ALLOWED_ORIGINS_STR.split(",")]
+
+# Adicionar suporte para qualquer subdomínio do Railway (produção)
+# Isso permite que front-production-*.up.railway.app funcione
+print(f"🔐 CORS configurado para as seguintes origens:")
+for origin in ALLOWED_ORIGINS:
+    print(f"   ✅ {origin}")
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_ORIGINS,  # ✅ Apenas origens confiáveis
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH"],
-    allow_headers=["Content-Type", "Authorization"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization", "Accept"],
+    expose_headers=["*"],
 )
 
 # Importar e incluir routers
