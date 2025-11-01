@@ -1,7 +1,8 @@
 """
 Model SQLAlchemy para Alunos
 """
-from sqlalchemy import Column, Integer, String, Numeric, Date, Boolean, Text, DateTime, func
+from sqlalchemy import Column, Integer, String, Numeric, Date, Boolean, Text, DateTime, func, ForeignKey
+from sqlalchemy.orm import relationship
 from app.database import Base
 
 class Aluno(Base):
@@ -18,6 +19,10 @@ class Aluno(Base):
     valor_mensalidade = Column(Numeric(10, 2), nullable=False)
     dia_vencimento = Column(Integer, nullable=False)  # 1-31
     data_inicio_contrato = Column(Date, nullable=True)
+
+    # Plano associado
+    plano_id = Column(Integer, ForeignKey('planos.id'), nullable=True)
+    plano = relationship("Plano", backref="alunos")
 
     # Status e contato
     ativo = Column(Boolean, default=True, nullable=False)

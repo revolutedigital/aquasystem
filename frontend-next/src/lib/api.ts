@@ -102,6 +102,17 @@ export const horariosAPI = {
   delete: (id: number) => api.delete(`/api/horarios/${id}`).then(res => res.data),
 }
 
+export const planosAPI = {
+  list: (includeInactive = false) => {
+    const params = includeInactive ? { ativo: false } : {}
+    return api.get('/api/planos', { params }).then(res => res.data)
+  },
+  get: (id: number) => api.get(`/api/planos/${id}`).then(res => res.data),
+  create: (data: Record<string, unknown>) => api.post('/api/planos', data).then(res => res.data),
+  update: (id: number, data: Record<string, unknown>) => api.put(`/api/planos/${id}`, data).then(res => res.data),
+  delete: (id: number) => api.delete(`/api/planos/${id}`).then(res => res.data),
+}
+
 export const dashboardAPI = {
   getMetrics: () => api.get('/api/dashboard/metrics').then(res => res.data),
   getRevenueChart: () => api.get('/api/dashboard/revenue').then(res => res.data),

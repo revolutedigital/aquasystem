@@ -13,6 +13,7 @@ import {
   Search,
   Plus,
   Settings,
+  CreditCard,
   LogOut,
 } from 'lucide-react'
 
@@ -70,6 +71,14 @@ export function CommandPalette() {
       icon: <UserCog className="h-4 w-4" />,
       action: () => router.push('/usuarios'),
       keywords: ['users', 'admin', 'gestão'],
+      group: 'Navegação',
+    },
+    {
+      id: 'planos',
+      label: 'Planos',
+      icon: <CreditCard className="h-4 w-4" />,
+      action: () => router.push('/planos'),
+      keywords: ['planos', 'assinatura', 'mensalidade', 'pacotes'],
       group: 'Navegação',
     },
     // Ações

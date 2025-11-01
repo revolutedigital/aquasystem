@@ -73,7 +73,7 @@ app.add_middleware(
 )
 
 # Importar e incluir routers
-from app.routes import alunos, pagamentos, horarios, auth, users
+from app.routes import alunos, pagamentos, horarios, auth, users, planos
 
 # Rotas de autenticação e usuários (públicas e protegidas)
 app.include_router(auth.router, prefix="/api", tags=["Autenticação"])
@@ -83,6 +83,7 @@ app.include_router(users.router, prefix="/api", tags=["Usuários"])
 app.include_router(alunos.router, prefix="/api", tags=["Alunos"])
 app.include_router(pagamentos.router, prefix="/api", tags=["Pagamentos"])
 app.include_router(horarios.router, prefix="/api", tags=["Horários"])
+app.include_router(planos.router, prefix="/api", tags=["Planos"])
 
 
 @app.get("/")

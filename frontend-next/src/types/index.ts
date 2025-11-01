@@ -111,3 +111,27 @@ export interface HorarioCreateData {
   tipo_aula: 'natacao' | 'hidroginastica'
   capacidade_maxima: number
 }
+
+export interface Plano {
+  id: number
+  nome: string
+  descricao?: string
+  valor_mensal: number
+  aulas_por_semana: number
+  duracao_aula_minutos: number
+  acesso_livre: boolean
+  permite_reposicao: boolean
+  dias_tolerancia: number
+  ativo: boolean
+}
+
+export interface PlanoCreateData {
+  nome: string
+  descricao?: string
+  valor_mensal: number
+  aulas_por_semana: number
+  duracao_aula_minutos?: number
+  acesso_livre?: boolean
+  permite_reposicao?: boolean
+  dias_tolerancia?: number
+}
