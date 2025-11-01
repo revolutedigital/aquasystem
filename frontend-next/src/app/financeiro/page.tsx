@@ -1,7 +1,8 @@
 "use client"
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, Suspense } from 'react'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import {
   DollarSign,
@@ -81,7 +82,8 @@ const formatDate = (date: string) => {
   return new Date(date).toLocaleDateString('pt-BR')
 }
 
-export default function FinanceiroPage() {
+function FinanceiroPageContent() {
+  const searchParams = useSearchParams()
   const [pagamentos, setPagamentos] = useState<PagamentoComStatus[]>([])
   const [alunos, setAlunos] = useState<Aluno[]>([])
   const [loading, setLoading] = useState(true)
@@ -158,6 +160,15 @@ export default function FinanceiroPage() {
   useEffect(() => {
     loadData()
   }, [loadData])
+
+  // Check for action parameter from quick actions
+  useEffect(() => {
+    if (searchParams.get('action') === 'new') {
+      setIsAddModalOpen(true)
+      // Clear the parameter after opening
+      window.history.replaceState({}, '', '/financeiro')
+    }
+  }, [searchParams])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -651,5 +662,13 @@ export default function FinanceiroPage() {
         </TabsContent>
       </Tabs>
     </div>
+  )
+}
+
+export default function FinanceiroPage() {
+  return (
+    <Suspense fallback={<div className="p-6">Carregando...</div>}>
+      <FinanceiroPageContent />
+    </Suspense>
   )
 }

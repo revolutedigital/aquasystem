@@ -1,7 +1,8 @@
 "use client"
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import {
   Users,
@@ -48,7 +49,8 @@ import { toast } from 'sonner'
 import { alunosAPI } from '@/lib/api'
 import type { Aluno } from '@/types'
 
-export default function AlunosPage() {
+function AlunosPageContent() {
+  const searchParams = useSearchParams()
   const [alunos, setAlunos] = useState<Aluno[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
@@ -71,6 +73,15 @@ export default function AlunosPage() {
   useEffect(() => {
     loadAlunos()
   }, [])
+
+  // Check for action parameter from quick actions
+  useEffect(() => {
+    if (searchParams.get('action') === 'new') {
+      setIsAddModalOpen(true)
+      // Clear the parameter after opening
+      window.history.replaceState({}, '', '/alunos')
+    }
+  }, [searchParams])
 
   const loadAlunos = async () => {
     try {
@@ -111,10 +122,16 @@ export default function AlunosPage() {
       try {
         await alunosAPI.delete(id)
         toast.success('Aluno excluído com sucesso!')
-        loadAlunos()
+        // Reload the list immediately after deletion
+        await loadAlunos()
       } catch (error) {
         console.error('Erro ao excluir aluno:', error)
-        toast.error('Erro ao excluir aluno')
+        let errorMessage = 'Erro ao excluir aluno'
+        if (error && typeof error === 'object' && 'response' in error) {
+          const response = error as { response?: { data?: { detail?: string } } }
+          errorMessage = response.response?.data?.detail || errorMessage
+        }
+        toast.error(errorMessage)
       }
     }
   }
@@ -500,5 +517,13 @@ export default function AlunosPage() {
         )}
       </Card>
     </div>
+  )
+}
+
+export default function AlunosPage() {
+  return (
+    <Suspense fallback={<div className="p-6">Carregando...</div>}>
+      <AlunosPageContent />
+    </Suspense>
   )
 }

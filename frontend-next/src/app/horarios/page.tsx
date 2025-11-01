@@ -1,7 +1,8 @@
 "use client"
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import {
   Calendar,
@@ -66,7 +67,8 @@ const cores = {
   'Competição': 'bg-red-500'
 }
 
-export default function HorariosPage() {
+function HorariosPageContent() {
+  const searchParams = useSearchParams()
   const [horariosList, setHorariosList] = useState<HorarioDetalhado[]>([])
   const [loading, setLoading] = useState(true)
   const [viewMode, setViewMode] = useState<'week' | 'list'>('week')
@@ -89,6 +91,15 @@ export default function HorariosPage() {
   useEffect(() => {
     loadHorarios()
   }, [])
+
+  // Check for action parameter from quick actions
+  useEffect(() => {
+    if (searchParams.get('action') === 'new') {
+      setIsAddModalOpen(true)
+      // Clear the parameter after opening
+      window.history.replaceState({}, '', '/horarios')
+    }
+  }, [searchParams])
 
   const loadHorarios = async () => {
     try {
@@ -599,5 +610,13 @@ export default function HorariosPage() {
         <ListView />
       )}
     </div>
+  )
+}
+
+export default function HorariosPage() {
+  return (
+    <Suspense fallback={<div className="p-6">Carregando...</div>}>
+      <HorariosPageContent />
+    </Suspense>
   )
 }
