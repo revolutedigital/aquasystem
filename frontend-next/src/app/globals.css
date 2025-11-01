@@ -4,48 +4,80 @@
 
 @layer base {
   :root {
+    /* Base colors */
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
+
+    /* Brand colors - Professional aquatic theme */
+    --primary: 199 89% 48%; /* Cyan-500 #06B6D4 */
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 199 89% 42%;
+
+    --secondary: 204 94% 94%; /* Sky-100 */
+    --secondary-foreground: 199 89% 48%;
+
+    --accent: 183 100% 96%; /* Cyan-50 */
+    --accent-foreground: 186 100% 29%;
+
+    /* Semantic colors */
+    --success: 142 71% 45%; /* Green-600 */
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%; /* Orange-500 */
+    --warning-foreground: 0 0% 100%;
+    --error: 0 84.2% 60.2%; /* Red-500 */
+    --error-foreground: 0 0% 100%;
+    --info: 217 91% 60%; /* Blue-500 */
+    --info-foreground: 0 0% 100%;
+
+    /* UI elements */
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
-    --primary: 207 73% 43%; /* Swimming Blue #1565C0 */
-    --primary-foreground: 210 40% 98%;
-    --secondary: 136 100% 29%; /* Swimming Green #00952F */
-    --secondary-foreground: 210 40% 98%;
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 207 73% 43%;
-    --radius: 0.5rem;
+    --ring: 199 89% 48%;
+    --radius: 0.75rem;
+
+    /* Shadows */
+    --shadow-soft: 0 2px 8px rgba(6, 182, 212, 0.1);
+    --shadow-medium: 0 8px 24px rgba(6, 182, 212, 0.15);
+    --shadow-strong: 0 16px 48px rgba(6, 182, 212, 0.2);
   }
 
   .dark {
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
+
+    --primary: 199 89% 48%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 186 100% 14%;
+    --secondary-foreground: 210 40% 98%;
+
+    --accent: 186 100% 14%;
+    --accent-foreground: 210 40% 98%;
+
+    --success: 142 71% 45%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+    --error: 0 84.2% 60.2%;
+    --error-foreground: 0 0% 100%;
+    --info: 217 91% 60%;
+    --info-foreground: 0 0% 100%;
+
     --card: 222.2 84% 4.9%;
     --card-foreground: 210 40% 98%;
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
-    --primary: 207 73% 53%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 136 70% 40%;
-    --secondary-foreground: 210 40% 98%;
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 207 73% 53%;
+    --ring: 199 89% 48%;
   }
 }
 
@@ -53,7 +85,77 @@
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer utilities {
+  .glass {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+  }
+
+  .dark .glass {
+    background: rgba(15, 23, 42, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .gradient-primary {
+    background: linear-gradient(135deg, #0EA5E9 0%, #06B6D4 50%, #0891B2 100%);
+  }
+
+  .gradient-secondary {
+    background: linear-gradient(135deg, #F0F9FF 0%, #E0F2FE 100%);
+  }
+
+  .gradient-dark {
+    background: linear-gradient(135deg, #0C4A6E 0%, #075985 100%);
+  }
+
+  .text-gradient {
+    @apply bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent;
+  }
+
+  .shadow-soft {
+    box-shadow: var(--shadow-soft);
+  }
+
+  .shadow-medium {
+    box-shadow: var(--shadow-medium);
+  }
+
+  .shadow-strong {
+    box-shadow: var(--shadow-strong);
+  }
+
+  .animate-wave {
+    animation: wave 2s ease-in-out infinite;
+  }
+
+  @keyframes wave {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-20px);
+    }
   }
 }
