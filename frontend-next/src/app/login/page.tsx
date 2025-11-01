@@ -52,7 +52,6 @@ export default function LoginPage() {
     <div className="min-h-screen relative flex items-center justify-center overflow-hidden">
       {/* Animated background */}
       <div className="absolute inset-0 bg-gradient-to-br from-cyan-400 via-blue-500 to-blue-600">
-        <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]" />
 
         {/* Animated waves */}
         <motion.div
@@ -130,6 +129,7 @@ export default function LoginPage() {
                   placeholder="seu.email@exemplo.com"
                   className="pl-10 h-12"
                   disabled={isLoading}
+                  autoComplete="email"
                   {...register('email')}
                 />
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
@@ -158,6 +158,7 @@ export default function LoginPage() {
                   placeholder="••••••••"
                   className="pl-10 pr-10 h-12"
                   disabled={isLoading}
+                  autoComplete="current-password"
                   {...register('password')}
                 />
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
