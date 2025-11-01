@@ -120,10 +120,9 @@ function HorariosPageContent() {
     e.preventDefault()
     try {
       const horarioData = {
-        dia_semana: formData.dia_semana,
+        dia_semana: formData.dia_semana.toLowerCase(),
         horario: formData.hora_inicio,
         tipo_aula: 'natacao' as 'natacao' | 'hidroginastica',
-        professor: formData.professor,
         capacidade_maxima: formData.capacidade
       }
 

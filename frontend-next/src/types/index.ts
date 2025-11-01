@@ -109,6 +109,5 @@ export interface HorarioCreateData {
   dia_semana: string
   horario: string
   tipo_aula: 'natacao' | 'hidroginastica'
-  professor: string
   capacidade_maxima: number
 }
