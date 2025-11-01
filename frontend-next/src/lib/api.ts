@@ -51,7 +51,10 @@ export const authAPI = {
 }
 
 export const alunosAPI = {
-  list: () => api.get('/api/alunos').then(res => res.data),
+  list: (includeInactive = false) => {
+    const params = includeInactive ? {} : { ativo: true }
+    return api.get('/api/alunos', { params }).then(res => res.data)
+  },
   get: (id: number) => api.get(`/api/alunos/${id}`).then(res => res.data),
   create: (data: AlunoCreateData) => api.post('/api/alunos', data).then(res => res.data),
   update: (id: number, data: AlunoUpdateData) => api.put(`/api/alunos/${id}`, data).then(res => res.data),

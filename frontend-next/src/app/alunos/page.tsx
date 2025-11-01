@@ -86,12 +86,11 @@ function AlunosPageContent() {
   const loadAlunos = async () => {
     try {
       setLoading(true)
-      const data = await alunosAPI.list()
+      const data = await alunosAPI.list() // Por padrão só lista alunos ativos
       setAlunos(data)
     } catch (error) {
       console.error('Erro ao carregar alunos:', error)
       toast.error('Erro ao carregar lista de alunos')
-      // Se falhar, não usar dados mockados - lista vazia
       setAlunos([])
     } finally {
       setLoading(false)
@@ -122,7 +121,6 @@ function AlunosPageContent() {
       try {
         await alunosAPI.delete(id)
         toast.success('Aluno excluído com sucesso!')
-        // Reload the list immediately after deletion
         await loadAlunos()
       } catch (error) {
         console.error('Erro ao excluir aluno:', error)
