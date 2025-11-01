@@ -39,17 +39,24 @@ import { horariosAPI } from '@/lib/api'
 interface HorarioDetalhado {
   id: number
   dia_semana: string
-  hora_inicio: string
-  hora_fim: string
-  turma: string
-  professor: string
-  nivel: string
-  sala_piscina: string
+  horario?: string // Campo do backend
+  hora_inicio?: string // Campo legado
+  hora_fim?: string
+  turma?: string
+  professor?: string
+  nivel?: string
+  sala_piscina?: string
   capacidade: number
-  alunos_matriculados: number
+  capacidade_maxima?: number // Campo do backend
+  alunos_matriculados?: number
+  tipo_aula?: string
 }
 
 const diasSemana = [
+  'segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado', 'domingo'
+]
+
+const diasSemanaNomes = [
   'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'
 ]
 
@@ -177,9 +184,11 @@ function HorariosPageContent() {
   }
 
   const getHorarioForSlot = (dia: string, hora: string) => {
-    return horariosList.find(
-      h => h.dia_semana === dia && h.hora_inicio === hora
-    )
+    return horariosList.find(h => {
+      // Backend retorna 'horario' no formato "HH:MM:SS", comparar apenas HH:MM
+      const horarioTime = h.hora_inicio?.substring(0, 5) || h.horario?.substring(0, 5)
+      return h.dia_semana === dia && horarioTime === hora
+    })
   }
 
   const WeekView = () => (
@@ -189,9 +198,9 @@ function HorariosPageContent() {
           <thead className="bg-muted/50">
             <tr>
               <th className="p-3 text-left font-medium">Horário</th>
-              {diasSemana.map(dia => (
-                <th key={dia} className="p-3 text-center font-medium min-w-[150px]">
-                  {dia}
+              {diasSemanaNomes.map((diaNome, index) => (
+                <th key={diasSemana[index]} className="p-3 text-center font-medium min-w-[150px]">
+                  {diaNome}
                 </th>
               ))}
             </tr>
@@ -208,28 +217,29 @@ function HorariosPageContent() {
                         <motion.div
                           initial={{ opacity: 0, scale: 0.9 }}
                           animate={{ opacity: 1, scale: 1 }}
-                          className={`${cores[horario.nivel as keyof typeof cores]} text-white rounded-lg p-2 cursor-pointer hover:opacity-90 transition-opacity`}
+                          className="bg-primary text-white rounded-lg p-2 cursor-pointer hover:opacity-90 transition-opacity"
                           onClick={() => {
                             setSelectedHorario(horario)
                             setFormData({
                               dia_semana: horario.dia_semana,
-                              hora_inicio: horario.hora_inicio,
-                              hora_fim: horario.hora_fim,
-                              turma: horario.turma,
-                              professor: horario.professor,
-                              nivel: horario.nivel,
-                              sala_piscina: horario.sala_piscina,
-                              capacidade: horario.capacidade,
-                              alunos_matriculados: horario.alunos_matriculados
+                              hora_inicio: horario.horario || horario.hora_inicio || '',
+                              hora_fim: horario.hora_fim || '',
+                              turma: horario.turma || '',
+                              professor: horario.professor || '',
+                              nivel: horario.nivel || 'Iniciante',
+                              sala_piscina: horario.sala_piscina || '',
+                              capacidade: horario.capacidade_maxima || horario.capacidade || 10,
+                              alunos_matriculados: horario.alunos_matriculados || 0
                             })
                             setIsAddModalOpen(true)
                           }}
                         >
-                          <div className="text-xs font-semibold">{horario.turma}</div>
-                          <div className="text-xs opacity-90">{horario.professor}</div>
+                          <div className="text-xs font-semibold">
+                            {horario.tipo_aula === 'natacao' ? 'Natação' : 'Hidroginástica'}
+                          </div>
                           <div className="text-xs mt-1">
                             <Users className="inline h-3 w-3 mr-1" />
-                            {horario.alunos_matriculados}/{horario.capacidade}
+                            {horario.alunos_matriculados || 0}/{horario.capacidade_maxima || horario.capacidade}
                           </div>
                         </motion.div>
                       ) : (
@@ -313,14 +323,14 @@ function HorariosPageContent() {
                       setSelectedHorario(horario)
                       setFormData({
                         dia_semana: horario.dia_semana,
-                        hora_inicio: horario.hora_inicio,
-                        hora_fim: horario.hora_fim,
-                        turma: horario.turma,
-                        professor: horario.professor,
-                        nivel: horario.nivel,
-                        sala_piscina: horario.sala_piscina,
-                        capacidade: horario.capacidade,
-                        alunos_matriculados: horario.alunos_matriculados
+                        hora_inicio: horario.horario || horario.hora_inicio || '',
+                        hora_fim: horario.hora_fim || '',
+                        turma: horario.turma || '',
+                        professor: horario.professor || '',
+                        nivel: horario.nivel || 'Iniciante',
+                        sala_piscina: horario.sala_piscina || '',
+                        capacidade: horario.capacidade_maxima || horario.capacidade || 10,
+                        alunos_matriculados: horario.alunos_matriculados || 0
                       })
                       setIsAddModalOpen(true)
                     }}
@@ -550,7 +560,7 @@ function HorariosPageContent() {
               <div>
                 <p className="text-sm text-muted-foreground">Alunos Matriculados</p>
                 <p className="text-2xl font-bold">
-                  {horariosList.reduce((acc, h) => acc + h.alunos_matriculados, 0)}
+                  {horariosList.reduce((acc, h) => acc + (h.alunos_matriculados || 0), 0)}
                 </p>
               </div>
               <Users className="h-8 w-8 text-green-500 opacity-50" />
@@ -589,8 +599,8 @@ function HorariosPageContent() {
                 <p className="text-sm text-muted-foreground">Taxa Ocupação</p>
                 <p className="text-2xl font-bold">
                   {horariosList.length > 0
-                    ? Math.round((horariosList.reduce((acc, h) => acc + h.alunos_matriculados, 0) /
-                        horariosList.reduce((acc, h) => acc + h.capacidade, 0)) * 100)
+                    ? Math.round((horariosList.reduce((acc, h) => acc + (h.alunos_matriculados || 0), 0) /
+                        horariosList.reduce((acc, h) => acc + (h.capacidade_maxima || h.capacidade), 0)) * 100)
                     : 0}%
                 </p>
               </div>
