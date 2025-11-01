@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { motion } from 'framer-motion'
 import {
   Users,
@@ -12,7 +13,8 @@ import {
   Phone,
   Calendar,
   AlertCircle,
-  User
+  User,
+  ArrowLeft
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -78,6 +80,8 @@ export default function AlunosPage() {
     } catch (error) {
       console.error('Erro ao carregar alunos:', error)
       toast.error('Erro ao carregar lista de alunos')
+      // Se falhar, não usar dados mockados - lista vazia
+      setAlunos([])
     } finally {
       setLoading(false)
     }
@@ -146,16 +150,23 @@ export default function AlunosPage() {
         animate={{ opacity: 1, y: 0 }}
         className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
       >
-        <div>
-          <h1 className="text-3xl font-bold flex items-center gap-3">
-            <div className="p-2 bg-primary/10 rounded-lg">
-              <Users className="h-6 w-6 text-primary" />
-            </div>
-            Alunos
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Gerencie os alunos matriculados
-          </p>
+        <div className="flex items-start gap-4">
+          <Link href="/">
+            <Button variant="outline" size="icon" className="shadow-sm">
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+          </Link>
+          <div>
+            <h1 className="text-3xl font-bold flex items-center gap-3">
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <Users className="h-6 w-6 text-primary" />
+              </div>
+              Alunos
+            </h1>
+            <p className="text-muted-foreground mt-1">
+              Gerencie os alunos matriculados
+            </p>
+          </div>
         </div>
 
         <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>

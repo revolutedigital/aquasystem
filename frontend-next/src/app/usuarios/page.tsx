@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { motion } from 'framer-motion'
 import {
   UserCog,
@@ -13,7 +14,8 @@ import {
   Key,
   User,
   CheckCircle,
-  Search
+  Search,
+  ArrowLeft
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -45,17 +47,7 @@ import {
 } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
 import { toast } from 'sonner'
-
-interface Usuario {
-  id: number
-  nome: string
-  email: string
-  telefone?: string
-  role: string
-  ativo: boolean
-  created_at: string
-  last_login?: string
-}
+import { usersAPI, type Usuario, type UsuarioCreate, type UsuarioUpdate } from '@/lib/api-users'
 
 const roleLabels: Record<string, string> = {
   admin: 'Administrador',
@@ -103,59 +95,8 @@ export default function UsuariosPage() {
   const loadUsuarios = async () => {
     try {
       setLoading(true)
-      // Dados mockados
-      const mockUsuarios = [
-        {
-          id: 1,
-          nome: 'Admin Sistema',
-          email: 'admin@natacao.com',
-          telefone: '(11) 99999-9999',
-          role: 'admin',
-          ativo: true,
-          created_at: '2024-01-01',
-          last_login: '2024-01-20T10:30:00'
-        },
-        {
-          id: 2,
-          nome: 'João Silva',
-          email: 'joao@natacao.com',
-          telefone: '(11) 98888-8888',
-          role: 'professor',
-          ativo: true,
-          created_at: '2024-01-05',
-          last_login: '2024-01-19T14:20:00'
-        },
-        {
-          id: 3,
-          nome: 'Maria Santos',
-          email: 'maria@natacao.com',
-          telefone: '(11) 97777-7777',
-          role: 'professor',
-          ativo: true,
-          created_at: '2024-01-05',
-          last_login: '2024-01-20T08:00:00'
-        },
-        {
-          id: 4,
-          nome: 'Ana Costa',
-          email: 'ana@natacao.com',
-          telefone: '(11) 96666-6666',
-          role: 'atendente',
-          ativo: true,
-          created_at: '2024-01-10',
-          last_login: '2024-01-20T09:15:00'
-        },
-        {
-          id: 5,
-          nome: 'Pedro Oliveira',
-          email: 'pedro@natacao.com',
-          telefone: '(11) 95555-5555',
-          role: 'user',
-          ativo: false,
-          created_at: '2024-01-15'
-        }
-      ]
-      setUsuarios(mockUsuarios)
+      const data = await usersAPI.list()
+      setUsuarios(data)
     } catch (error) {
       console.error('Erro ao carregar usuários:', error)
       toast.error('Erro ao carregar lista de usuários')
@@ -175,27 +116,29 @@ export default function UsuariosPage() {
     try {
       if (selectedUsuario) {
         // Atualizar usuário
-        const updatedUsers = usuarios.map(u =>
-          u.id === selectedUsuario.id
-            ? { ...u, ...formData, password: undefined, confirmPassword: undefined }
-            : u
-        )
-        setUsuarios(updatedUsers)
-        toast.success('Usuário atualizado com sucesso!')
-      } else {
-        // Criar novo usuário
-        const newUser = {
-          id: usuarios.length + 1,
+        const updateData: UsuarioUpdate = {
           nome: formData.nome,
           email: formData.email,
           telefone: formData.telefone,
           role: formData.role,
-          ativo: formData.ativo,
-          created_at: new Date().toISOString().split('T')[0]
+          ativo: formData.ativo
         }
-        setUsuarios([...usuarios, newUser])
+        await usersAPI.update(selectedUsuario.id, updateData)
+        toast.success('Usuário atualizado com sucesso!')
+      } else {
+        // Criar novo usuário
+        const createData: UsuarioCreate = {
+          nome: formData.nome,
+          email: formData.email,
+          password: formData.password,
+          telefone: formData.telefone,
+          role: formData.role,
+          ativo: formData.ativo
+        }
+        await usersAPI.create(createData)
         toast.success('Usuário cadastrado com sucesso!')
       }
+      loadUsuarios() // Recarregar lista
       setIsAddModalOpen(false)
       resetForm()
     } catch (error) {
@@ -218,10 +161,13 @@ export default function UsuariosPage() {
     }
 
     try {
-      toast.success('Senha alterada com sucesso!')
-      setIsPasswordModalOpen(false)
-      setPasswordData({ newPassword: '', confirmPassword: '' })
-      setSelectedUsuario(null)
+      if (selectedUsuario) {
+        await usersAPI.changePassword(selectedUsuario.id, passwordData.newPassword)
+        toast.success('Senha alterada com sucesso!')
+        setIsPasswordModalOpen(false)
+        setPasswordData({ newPassword: '', confirmPassword: '' })
+        setSelectedUsuario(null)
+      }
     } catch (error) {
       console.error('Erro ao alterar senha:', error)
       toast.error('Erro ao alterar senha')
@@ -231,8 +177,9 @@ export default function UsuariosPage() {
   const handleDelete = async (id: number) => {
     if (confirm('Tem certeza que deseja excluir este usuário?')) {
       try {
-        setUsuarios(usuarios.filter(u => u.id !== id))
+        await usersAPI.delete(id)
         toast.success('Usuário excluído com sucesso!')
+        loadUsuarios() // Recarregar lista
       } catch (error) {
         console.error('Erro ao excluir usuário:', error)
         toast.error('Erro ao excluir usuário')
@@ -242,11 +189,12 @@ export default function UsuariosPage() {
 
   const handleToggleStatus = async (id: number, ativo: boolean) => {
     try {
-      const updatedUsers = usuarios.map(u =>
-        u.id === id ? { ...u, ativo } : u
-      )
-      setUsuarios(updatedUsers)
-      toast.success(`Usuário ${ativo ? 'ativado' : 'desativado'} com sucesso!`)
+      const usuario = usuarios.find(u => u.id === id)
+      if (usuario) {
+        await usersAPI.update(id, { ativo })
+        toast.success(`Usuário ${ativo ? 'ativado' : 'desativado'} com sucesso!`)
+        loadUsuarios() // Recarregar lista
+      }
     } catch (error) {
       console.error('Erro ao alterar status:', error)
       toast.error('Erro ao alterar status do usuário')
@@ -285,16 +233,23 @@ export default function UsuariosPage() {
         animate={{ opacity: 1, y: 0 }}
         className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
       >
-        <div>
-          <h1 className="text-3xl font-bold flex items-center gap-3">
-            <div className="p-2 bg-primary/10 rounded-lg">
-              <UserCog className="h-6 w-6 text-primary" />
-            </div>
-            Usuários
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Gerencie usuários e permissões
-          </p>
+        <div className="flex items-start gap-4">
+          <Link href="/">
+            <Button variant="outline" size="icon" className="shadow-sm">
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+          </Link>
+          <div>
+            <h1 className="text-3xl font-bold flex items-center gap-3">
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <UserCog className="h-6 w-6 text-primary" />
+              </div>
+              Usuários
+            </h1>
+            <p className="text-muted-foreground mt-1">
+              Gerencie usuários e permissões
+            </p>
+          </div>
         </div>
 
         <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>

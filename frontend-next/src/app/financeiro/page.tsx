@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState, useCallback } from 'react'
+import Link from 'next/link'
 import { motion } from 'framer-motion'
 import {
   DollarSign,
@@ -14,7 +15,8 @@ import {
   Search,
   Receipt,
   Trash2,
-  X
+  X,
+  ArrowLeft
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -118,51 +120,12 @@ export default function FinanceiroPage() {
         alunosAPI.list()
       ])
 
-      // Dados mockados caso a API falhe
-      const mockPagamentos = [
-        {
-          id: 1,
-          aluno_id: 1,
-          aluno_nome: 'João Silva',
-          valor: 250,
-          data_pagamento: '2024-01-15',
-          mes_referencia: 1,
-          ano_referencia: 2024,
-          forma_pagamento: 'pix',
-          status: 'confirmado',
-          observacoes: ''
-        },
-        {
-          id: 2,
-          aluno_id: 2,
-          aluno_nome: 'Maria Santos',
-          valor: 250,
-          data_pagamento: '2024-01-10',
-          mes_referencia: 1,
-          ano_referencia: 2024,
-          forma_pagamento: 'cartao_credito',
-          status: 'confirmado',
-          observacoes: ''
-        },
-        {
-          id: 3,
-          aluno_id: 3,
-          aluno_nome: 'Pedro Costa',
-          valor: 250,
-          data_pagamento: null,
-          mes_referencia: 1,
-          ano_referencia: 2024,
-          forma_pagamento: '',
-          status: 'pendente',
-          observacoes: ''
-        }
-      ]
-
-      setPagamentos(pagamentosData.length ? pagamentosData : mockPagamentos)
-      setAlunos(alunosData)
+      // Não usar dados mockados - usar lista vazia se falhar
+      setPagamentos(pagamentosData || [])
+      setAlunos(alunosData || [])
 
       // Calcular stats
-      const pagamentosList = pagamentosData.length ? pagamentosData : mockPagamentos
+      const pagamentosList = pagamentosData || []
       const total = pagamentosList
         .filter((p: PagamentoComStatus) => p.status === 'confirmado')
         .reduce((acc: number, p: PagamentoComStatus) => acc + p.valor, 0)
@@ -293,16 +256,23 @@ export default function FinanceiroPage() {
         animate={{ opacity: 1, y: 0 }}
         className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
       >
-        <div>
-          <h1 className="text-3xl font-bold flex items-center gap-3">
-            <div className="p-2 bg-primary/10 rounded-lg">
-              <DollarSign className="h-6 w-6 text-primary" />
-            </div>
-            Financeiro
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Gerencie pagamentos e receitas
-          </p>
+        <div className="flex items-start gap-4">
+          <Link href="/">
+            <Button variant="outline" size="icon" className="shadow-sm">
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+          </Link>
+          <div>
+            <h1 className="text-3xl font-bold flex items-center gap-3">
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <DollarSign className="h-6 w-6 text-primary" />
+              </div>
+              Financeiro
+            </h1>
+            <p className="text-muted-foreground mt-1">
+              Gerencie pagamentos e receitas
+            </p>
+          </div>
         </div>
 
         <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>

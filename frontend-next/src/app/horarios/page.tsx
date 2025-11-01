@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { motion } from 'framer-motion'
 import {
   Calendar,
@@ -9,7 +10,8 @@ import {
   Users,
   MapPin,
   Edit,
-  Trash2
+  Trash2,
+  ArrowLeft
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -95,57 +97,9 @@ export default function HorariosPage() {
       setHorariosList(data)
     } catch (error) {
       console.error('Erro ao carregar horários:', error)
-      // Usar dados mockados se a API falhar
-      setHorariosList([
-        {
-          id: 1,
-          dia_semana: 'Segunda',
-          hora_inicio: '07:00',
-          hora_fim: '08:00',
-          turma: 'Iniciante A',
-          professor: 'João Silva',
-          nivel: 'Iniciante',
-          sala_piscina: 'Piscina 1',
-          capacidade: 10,
-          alunos_matriculados: 8
-        },
-        {
-          id: 2,
-          dia_semana: 'Segunda',
-          hora_inicio: '08:00',
-          hora_fim: '09:00',
-          turma: 'Intermediário B',
-          professor: 'Maria Santos',
-          nivel: 'Intermediário',
-          sala_piscina: 'Piscina 2',
-          capacidade: 12,
-          alunos_matriculados: 10
-        },
-        {
-          id: 3,
-          dia_semana: 'Terça',
-          hora_inicio: '07:00',
-          hora_fim: '08:00',
-          turma: 'Avançado C',
-          professor: 'Pedro Costa',
-          nivel: 'Avançado',
-          sala_piscina: 'Piscina 1',
-          capacidade: 8,
-          alunos_matriculados: 6
-        },
-        {
-          id: 4,
-          dia_semana: 'Quarta',
-          hora_inicio: '18:00',
-          hora_fim: '19:00',
-          turma: 'Competição',
-          professor: 'Ana Oliveira',
-          nivel: 'Competição',
-          sala_piscina: 'Piscina Olímpica',
-          capacidade: 15,
-          alunos_matriculados: 12
-        }
-      ])
+      toast.error('Erro ao carregar horários')
+      // Se falhar, não usar dados mockados - lista vazia
+      setHorariosList([])
     } finally {
       setLoading(false)
     }
@@ -381,16 +335,23 @@ export default function HorariosPage() {
         animate={{ opacity: 1, y: 0 }}
         className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
       >
-        <div>
-          <h1 className="text-3xl font-bold flex items-center gap-3">
-            <div className="p-2 bg-primary/10 rounded-lg">
-              <Calendar className="h-6 w-6 text-primary" />
-            </div>
-            Horários
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Gerencie os horários das aulas
-          </p>
+        <div className="flex items-start gap-4">
+          <Link href="/">
+            <Button variant="outline" size="icon" className="shadow-sm">
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+          </Link>
+          <div>
+            <h1 className="text-3xl font-bold flex items-center gap-3">
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <Calendar className="h-6 w-6 text-primary" />
+              </div>
+              Horários
+            </h1>
+            <p className="text-muted-foreground mt-1">
+              Gerencie os horários das aulas
+            </p>
+          </div>
         </div>
 
         <div className="flex items-center gap-3">
