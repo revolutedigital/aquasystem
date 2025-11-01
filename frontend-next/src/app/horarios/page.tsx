@@ -104,12 +104,14 @@ function HorariosPageContent() {
   const loadHorarios = async () => {
     try {
       setLoading(true)
+      console.log('Carregando horários...')
       const data = await horariosAPI.list()
+      console.log('Horários recebidos:', data)
+      console.log('Total de horários:', data.length)
       setHorariosList(data)
     } catch (error) {
       console.error('Erro ao carregar horários:', error)
       toast.error('Erro ao carregar horários')
-      // Se falhar, não usar dados mockados - lista vazia
       setHorariosList([])
     } finally {
       setLoading(false)
@@ -126,14 +128,18 @@ function HorariosPageContent() {
         capacidade_maxima: formData.capacidade
       }
 
+      console.log('Enviando horário:', horarioData)
+
       if (selectedHorario) {
         await horariosAPI.update(selectedHorario.id, horarioData)
         toast.success('Horário atualizado com sucesso!')
       } else {
-        await horariosAPI.create(horarioData)
+        const result = await horariosAPI.create(horarioData)
+        console.log('Horário criado:', result)
         toast.success('Horário cadastrado com sucesso!')
       }
-      loadHorarios()
+      console.log('Recarregando lista...')
+      await loadHorarios()
       setIsAddModalOpen(false)
       resetForm()
     } catch (error) {
