@@ -52,7 +52,8 @@ export const authAPI = {
 
 export const alunosAPI = {
   list: (includeInactive = false) => {
-    const params = includeInactive ? {} : { ativo: true }
+    // Backend já filtra apenas ativos por padrão
+    const params = includeInactive ? { ativo: false } : {}
     return api.get('/api/alunos', { params }).then(res => res.data)
   },
   get: (id: number) => api.get(`/api/alunos/${id}`).then(res => res.data),

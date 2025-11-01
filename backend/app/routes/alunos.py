@@ -42,11 +42,11 @@ async def criar_aluno(aluno: AlunoCreate, db: Session = Depends(get_db)):
 
 @router.get("/alunos", response_model=List[AlunoResponse])
 async def listar_alunos(
-    ativo: Optional[bool] = Query(None, description="Filtrar por status ativo"),
+    ativo: Optional[bool] = Query(True, description="Filtrar por status ativo (padrão: apenas ativos)"),
     tipo_aula: Optional[str] = Query(None, description="Filtrar por tipo de aula (natacao ou hidroginastica)"),
     db: Session = Depends(get_db)
 ):
-    """Listar alunos com filtros opcionais"""
+    """Listar alunos com filtros opcionais - por padrão lista apenas ativos"""
     query = db.query(Aluno)
 
     if ativo is not None:
