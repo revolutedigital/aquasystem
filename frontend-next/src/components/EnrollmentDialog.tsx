@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Users, X, Plus, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -17,7 +17,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
 import { horariosAPI, alunosAPI } from '@/lib/api'
 
@@ -45,8 +44,11 @@ interface EnrollmentDialogProps {
   onEnrollmentChange?: () => void
 }
 
-interface AlunoEnrolled extends Aluno {
-  enrolled?: boolean
+interface VagasData {
+  horario_id: number
+  capacidade_maxima: number
+  alunos_matriculados: number
+  vagas_disponiveis: number
 }
 
 export function EnrollmentDialog({
@@ -61,15 +63,9 @@ export function EnrollmentDialog({
   const [selectedAlunoId, setSelectedAlunoId] = useState<string>('')
   const [loading, setLoading] = useState(false)
   const [adding, setAdding] = useState(false)
-  const [vagas, setVagas] = useState<any>(null)
+  const [vagas, setVagas] = useState<VagasData | null>(null)
 
-  useEffect(() => {
-    if (open) {
-      loadData()
-    }
-  }, [open, horarioId])
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setLoading(true)
     try {
       // Load all active students
@@ -82,7 +78,7 @@ export function EnrollmentDialog({
 
       // Load enrolled students through grade completa
       const gradeCompleta = await horariosAPI.getGradeCompleta()
-      const horario = gradeCompleta.find((h: any) => h.id === horarioId)
+      const horario = gradeCompleta.find((h: { id: number }) => h.id === horarioId)
       if (horario && horario.alunos) {
         setEnrolledAlunos(horario.alunos)
       } else {
@@ -94,7 +90,13 @@ export function EnrollmentDialog({
     } finally {
       setLoading(false)
     }
-  }
+  }, [horarioId])
+
+  useEffect(() => {
+    if (open) {
+      loadData()
+    }
+  }, [open, loadData])
 
   const handleAddAluno = async () => {
     if (!selectedAlunoId) {
@@ -109,9 +111,9 @@ export function EnrollmentDialog({
       setSelectedAlunoId('')
       await loadData()
       onEnrollmentChange?.()
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error adding student:', error)
-      const errorMsg = error?.response?.data?.detail || 'Erro ao adicionar aluno ao horário'
+      const errorMsg = (error as { response?: { data?: { detail?: string } } })?.response?.data?.detail || 'Erro ao adicionar aluno ao horário'
       toast.error(errorMsg)
     } finally {
       setAdding(false)
@@ -124,9 +126,9 @@ export function EnrollmentDialog({
       toast.success('Aluno removido do horário')
       await loadData()
       onEnrollmentChange?.()
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error removing student:', error)
-      const errorMsg = error?.response?.data?.detail || 'Erro ao remover aluno do horário'
+      const errorMsg = (error as { response?: { data?: { detail?: string } } })?.response?.data?.detail || 'Erro ao remover aluno do horário'
       toast.error(errorMsg)
     }
   }
