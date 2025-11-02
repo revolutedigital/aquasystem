@@ -55,7 +55,7 @@ import {
 import { toast } from 'sonner'
 import { pagamentosAPI, alunosAPI } from '@/lib/api'
 import { RevenueChart } from '@/components/charts/RevenueChart'
-import type { Aluno } from '@/types'
+import type { Aluno, Pagamento } from '@/types'
 
 interface PagamentoComNome {
   id: number
@@ -125,7 +125,7 @@ function FinanceiroPageContent() {
       ])
 
       // Mapear pagamentos com nome do aluno
-      const pagamentosComNome = (pagamentosData || []).map((p: any) => {
+      const pagamentosComNome = (pagamentosData || []).map((p: Pagamento) => {
         const aluno = alunosData.find((a: Aluno) => a.id === p.aluno_id)
         return {
           ...p,
