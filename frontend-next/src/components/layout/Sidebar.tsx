@@ -28,6 +28,7 @@ const navigation = [
   { name: 'Horários', href: '/horarios', icon: Calendar, id: 'schedules' },
   { name: 'Financeiro', href: '/financeiro', icon: DollarSign, id: 'financial' },
   { name: 'Usuários', href: '/usuarios', icon: UserCog, id: 'users' },
+  { name: 'Configurações', href: '/configuracoes', icon: Settings, id: 'settings' },
 ]
 
 export function Sidebar() {
