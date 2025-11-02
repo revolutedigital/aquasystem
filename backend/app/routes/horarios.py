@@ -34,6 +34,46 @@ async def listar_horarios(db: Session = Depends(get_db)):
     return horarios
 
 
+@router.get("/horarios/grade-completa", response_model=List[HorarioComAlunos])
+async def obter_grade_completa(db: Session = Depends(get_db)):
+    """
+    Obter grade completa de horários com lista de alunos matriculados
+    Útil para visualização da grade semanal
+    """
+    horarios = db.query(Horario).order_by(Horario.dia_semana, Horario.horario).all()
+
+    grade_completa = []
+    for horario in horarios:
+        # Buscar alunos matriculados neste horário
+        matriculas = db.query(AlunoHorario).filter(AlunoHorario.horario_id == horario.id).all()
+        alunos = []
+
+        for matricula in matriculas:
+            aluno = db.query(Aluno).filter(Aluno.id == matricula.aluno_id).first()
+            if aluno:
+                alunos.append(AlunoSimplificado(
+                    id=aluno.id,
+                    nome_completo=aluno.nome_completo,
+                    telefone_whatsapp=aluno.telefone_whatsapp
+                ))
+
+        # Calcular vagas disponíveis
+        vagas_disponiveis = horario.capacidade_maxima - len(alunos)
+
+        # Adicionar à grade
+        grade_completa.append(HorarioComAlunos(
+            id=horario.id,
+            dia_semana=horario.dia_semana,
+            horario=horario.horario,
+            capacidade_maxima=horario.capacidade_maxima,
+            tipo_aula=horario.tipo_aula,
+            alunos=alunos,
+            vagas_disponiveis=vagas_disponiveis
+        ))
+
+    return grade_completa
+
+
 @router.get("/horarios/{id}", response_model=HorarioResponse)
 async def obter_horario(id: int, db: Session = Depends(get_db)):
     """Obter horário por ID"""
@@ -173,43 +213,3 @@ async def obter_vagas_horario(id: int, db: Session = Depends(get_db)):
         "vagas_disponiveis": vagas_disponiveis,
         "percentual_ocupacao": round((alunos_matriculados / horario.capacidade_maxima) * 100, 2)
     }
-
-
-@router.get("/horarios/grade-completa", response_model=List[HorarioComAlunos])
-async def obter_grade_completa(db: Session = Depends(get_db)):
-    """
-    Obter grade completa de horários com lista de alunos matriculados
-    Útil para visualização da grade semanal
-    """
-    horarios = db.query(Horario).order_by(Horario.dia_semana, Horario.horario).all()
-
-    grade_completa = []
-    for horario in horarios:
-        # Buscar alunos matriculados neste horário
-        matriculas = db.query(AlunoHorario).filter(AlunoHorario.horario_id == horario.id).all()
-        alunos = []
-
-        for matricula in matriculas:
-            aluno = db.query(Aluno).filter(Aluno.id == matricula.aluno_id).first()
-            if aluno:
-                alunos.append(AlunoSimplificado(
-                    id=aluno.id,
-                    nome_completo=aluno.nome_completo,
-                    telefone_whatsapp=aluno.telefone_whatsapp
-                ))
-
-        # Calcular vagas disponíveis
-        vagas_disponiveis = horario.capacidade_maxima - len(alunos)
-
-        # Adicionar à grade
-        grade_completa.append(HorarioComAlunos(
-            id=horario.id,
-            dia_semana=horario.dia_semana,
-            horario=horario.horario,
-            capacidade_maxima=horario.capacidade_maxima,
-            tipo_aula=horario.tipo_aula,
-            alunos=alunos,
-            vagas_disponiveis=vagas_disponiveis
-        ))
-
-    return grade_completa
