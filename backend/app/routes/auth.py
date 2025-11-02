@@ -7,16 +7,27 @@ from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
 from typing import Optional
 from slowapi import Limiter
-from slowapi.util import get_remote_address
 
 from app.database import get_db
 from app.models.user import User
 from app.schemas.user import UserLogin, Token, UserResponse, TokenData
 from app.utils.auth import verify_password, create_access_token, decode_access_token
 
+
+def get_real_ip(request: Request) -> str:
+    """Obtém IP real considerando proxies"""
+    forwarded_for = request.headers.get("X-Forwarded-For")
+    if forwarded_for:
+        return forwarded_for.split(",")[0].strip()
+    real_ip = request.headers.get("X-Real-IP")
+    if real_ip:
+        return real_ip
+    return request.client.host if request.client else "unknown"
+
+
 router = APIRouter()
 security = HTTPBearer()
-limiter = Limiter(key_func=get_remote_address)
+limiter = Limiter(key_func=get_real_ip)
 
 
 def get_current_user(

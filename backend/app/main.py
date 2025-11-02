@@ -30,8 +30,27 @@ async def lifespan(app: FastAPI):
     print("🔴 Sistema encerrado")
 
 
-# Configurar rate limiter
-limiter = Limiter(key_func=get_remote_address, default_limits=["100/minute"])
+def get_real_ip(request: Request) -> str:
+    """
+    Obtém o IP real do cliente, considerando proxies reversos (Railway, etc)
+    """
+    # Tentar obter IP do header X-Forwarded-For (Railway usa isso)
+    forwarded_for = request.headers.get("X-Forwarded-For")
+    if forwarded_for:
+        # X-Forwarded-For pode ter múltiplos IPs, pegar o primeiro (cliente real)
+        return forwarded_for.split(",")[0].strip()
+
+    # Fallback para X-Real-IP
+    real_ip = request.headers.get("X-Real-IP")
+    if real_ip:
+        return real_ip
+
+    # Último fallback: IP direto da conexão
+    return request.client.host if request.client else "unknown"
+
+
+# Configurar rate limiter com função customizada para proxies
+limiter = Limiter(key_func=get_real_ip, default_limits=["100/minute"])
 
 # Criar aplicação FastAPI
 app = FastAPI(
