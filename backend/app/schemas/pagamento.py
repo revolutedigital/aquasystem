@@ -13,7 +13,7 @@ class PagamentoBase(BaseModel):
     valor: Decimal = Field(..., ge=0)
     data_pagamento: date
     mes_referencia: str = Field(..., pattern="^\\d{4}-\\d{2}$")  # Formato: YYYY-MM
-    forma_pagamento: str = Field(..., pattern="^(dinheiro|pix|cartao|transferencia)$")
+    forma_pagamento: str = Field(..., pattern="^(dinheiro|pix|cartao_credito|cartao_debito|transferencia)$")
     observacoes: Optional[str] = None
 
 
@@ -28,7 +28,7 @@ class PagamentoUpdate(BaseModel):
     valor: Optional[Decimal] = Field(None, ge=0)
     data_pagamento: Optional[date] = None
     mes_referencia: Optional[str] = Field(None, pattern="^\\d{4}-\\d{2}$")
-    forma_pagamento: Optional[str] = Field(None, pattern="^(dinheiro|pix|cartao|transferencia)$")
+    forma_pagamento: Optional[str] = Field(None, pattern="^(dinheiro|pix|cartao_credito|cartao_debito|transferencia)$")
     observacoes: Optional[str] = None
 
 
