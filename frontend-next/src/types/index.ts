@@ -27,10 +27,9 @@ export interface Pagamento {
   aluno?: Aluno
   valor: number
   data_pagamento: string
-  mes_referencia: number
-  ano_referencia: number
-  forma_pagamento: 'dinheiro' | 'pix' | 'cartao_credito' | 'cartao_debito'
-  observacao?: string
+  mes_referencia: string  // Formato: YYYY-MM
+  forma_pagamento: 'dinheiro' | 'pix' | 'cartao_credito' | 'cartao_debito' | 'transferencia'
+  observacoes?: string
   created_at: string
 }
 
@@ -99,10 +98,9 @@ export interface PagamentoCreateData {
   aluno_id: number
   valor: number
   data_pagamento: string
-  mes_referencia: number
-  ano_referencia: number
-  forma_pagamento: 'dinheiro' | 'pix' | 'cartao_credito' | 'cartao_debito'
-  observacao?: string
+  mes_referencia: string  // Formato: YYYY-MM
+  forma_pagamento: 'dinheiro' | 'pix' | 'cartao_credito' | 'cartao_debito' | 'transferencia'
+  observacoes?: string
 }
 
 export interface HorarioCreateData {

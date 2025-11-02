@@ -58,17 +58,16 @@ import { pagamentosAPI, alunosAPI } from '@/lib/api'
 import { RevenueChart } from '@/components/charts/RevenueChart'
 import type { Aluno } from '@/types'
 
-interface PagamentoComStatus {
+interface PagamentoComNome {
   id: number
   aluno_id: number
   aluno_nome?: string
   valor: number
-  data_pagamento: string | null
-  mes_referencia: number
-  ano_referencia: number
+  data_pagamento: string
+  mes_referencia: string  // Formato: YYYY-MM
   forma_pagamento: string
-  status: 'confirmado' | 'pendente' | 'cancelado'
   observacoes?: string
+  created_at: string
 }
 
 const formatCurrency = (value: number) => {
@@ -82,17 +81,22 @@ const formatDate = (date: string) => {
   return new Date(date).toLocaleDateString('pt-BR')
 }
 
+// Helper para extrair mes e ano de mes_referencia string "YYYY-MM"
+const parseMesReferencia = (mesRef: string): { mes: number, ano: number } => {
+  const [ano, mes] = mesRef.split('-').map(Number)
+  return { mes, ano }
+}
+
 function FinanceiroPageContent() {
   const searchParams = useSearchParams()
-  const [pagamentos, setPagamentos] = useState<PagamentoComStatus[]>([])
+  const [pagamentos, setPagamentos] = useState<PagamentoComNome[]>([])
   const [alunos, setAlunos] = useState<Aluno[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
-  const [filterStatus, setFilterStatus] = useState('all')
   const [filterMonth, setFilterMonth] = useState(new Date().getMonth() + 1)
   const [filterYear, setFilterYear] = useState(new Date().getFullYear())
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
-  const [selectedPagamento, setSelectedPagamento] = useState<PagamentoComStatus | null>(null)
+  const [selectedPagamento, setSelectedPagamento] = useState<PagamentoComNome | null>(null)
 
   // Form state
   const [formData, setFormData] = useState({
@@ -102,7 +106,6 @@ function FinanceiroPageContent() {
     mes_referencia: new Date().getMonth() + 1,
     ano_referencia: new Date().getFullYear(),
     forma_pagamento: 'pix',
-    status: 'confirmado',
     observacoes: ''
   })
 
@@ -128,26 +131,18 @@ function FinanceiroPageContent() {
 
       // Calcular stats
       const pagamentosList = pagamentosData || []
-      const total = pagamentosList
-        .filter((p: PagamentoComStatus) => p.status === 'confirmado')
-        .reduce((acc: number, p: PagamentoComStatus) => acc + p.valor, 0)
+      const mesReferenciaAtual = `${filterYear}-${String(filterMonth).padStart(2, '0')}`
+
+      const total = pagamentosList.reduce((acc: number, p: PagamentoComNome) => acc + p.valor, 0)
 
       const mesAtual = pagamentosList
-        .filter((p: PagamentoComStatus) =>
-          p.status === 'confirmado' &&
-          p.mes_referencia === filterMonth &&
-          p.ano_referencia === filterYear
-        )
-        .reduce((acc: number, p: PagamentoComStatus) => acc + p.valor, 0)
-
-      const pendente = pagamentosList
-        .filter((p: PagamentoComStatus) => p.status === 'pendente')
-        .reduce((acc: number, p: PagamentoComStatus) => acc + p.valor, 0)
+        .filter((p: PagamentoComNome) => p.mes_referencia === mesReferenciaAtual)
+        .reduce((acc: number, p: PagamentoComNome) => acc + p.valor, 0)
 
       setStats({
         receitaTotal: total,
         receitaMes: mesAtual,
-        pendente: pendente,
+        pendente: 0,  // Backend não tem status, então pendente sempre 0
         inadimplentes: alunosData.filter((a: Aluno) => !a.ativo).length
       })
     } catch (error) {
@@ -173,14 +168,17 @@ function FinanceiroPageContent() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
+      // Formatar mes_referencia como YYYY-MM
+      const mesFormatado = String(formData.mes_referencia).padStart(2, '0')
+      const mesReferencia = `${formData.ano_referencia}-${mesFormatado}`
+
       const pagamentoData = {
         aluno_id: parseInt(formData.aluno_id),
         valor: parseFloat(formData.valor),
         data_pagamento: formData.data_pagamento,
-        mes_referencia: formData.mes_referencia,
-        ano_referencia: formData.ano_referencia,
+        mes_referencia: mesReferencia,
         forma_pagamento: formData.forma_pagamento as 'pix' | 'dinheiro' | 'cartao_credito' | 'cartao_debito',
-        observacao: formData.observacoes
+        observacoes: formData.observacoes
       }
 
       if (selectedPagamento) {
@@ -221,7 +219,6 @@ function FinanceiroPageContent() {
       mes_referencia: new Date().getMonth() + 1,
       ano_referencia: new Date().getFullYear(),
       forma_pagamento: 'pix',
-      status: 'confirmado',
       observacoes: ''
     })
     setSelectedPagamento(null)
@@ -229,24 +226,11 @@ function FinanceiroPageContent() {
 
   const filteredPagamentos = pagamentos.filter(pagamento => {
     const matchesSearch = pagamento.aluno_nome?.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesStatus = filterStatus === 'all' || pagamento.status === filterStatus
-    const matchesMonth = pagamento.mes_referencia === filterMonth
-    const matchesYear = pagamento.ano_referencia === filterYear
-    return matchesSearch && matchesStatus && matchesMonth && matchesYear
+    const { mes, ano } = parseMesReferencia(pagamento.mes_referencia)
+    const matchesMonth = mes === filterMonth
+    const matchesYear = ano === filterYear
+    return matchesSearch && matchesMonth && matchesYear
   })
-
-  const getStatusBadge = (status: string) => {
-    switch(status) {
-      case 'confirmado':
-        return <Badge className="bg-green-500">Confirmado</Badge>
-      case 'pendente':
-        return <Badge className="bg-yellow-500">Pendente</Badge>
-      case 'cancelado':
-        return <Badge className="bg-red-500">Cancelado</Badge>
-      default:
-        return <Badge>{status}</Badge>
-    }
-  }
 
   const getFormaPagamento = (forma: string) => {
     const formas: Record<string, string> = {
@@ -396,22 +380,6 @@ function FinanceiroPageContent() {
                     required
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="status">Status*</Label>
-                  <Select
-                    value={formData.status}
-                    onValueChange={(value) => setFormData({...formData, status: value})}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione o status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="confirmado">Confirmado</SelectItem>
-                      <SelectItem value="pendente">Pendente</SelectItem>
-                      <SelectItem value="cancelado">Cancelado</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
                 <div className="col-span-2 space-y-2">
                   <Label htmlFor="observacoes">Observações</Label>
                   <Input
@@ -545,17 +513,6 @@ function FinanceiroPageContent() {
                   />
                 </div>
               </div>
-              <Select value={filterStatus} onValueChange={setFilterStatus}>
-                <SelectTrigger className="w-full sm:w-[200px]">
-                  <SelectValue placeholder="Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos</SelectItem>
-                  <SelectItem value="confirmado">Confirmados</SelectItem>
-                  <SelectItem value="pendente">Pendentes</SelectItem>
-                  <SelectItem value="cancelado">Cancelados</SelectItem>
-                </SelectContent>
-              </Select>
               <Select
                 value={filterMonth.toString()}
                 onValueChange={(value) => setFilterMonth(parseInt(value))}
@@ -607,7 +564,6 @@ function FinanceiroPageContent() {
                     <TableHead>Referência</TableHead>
                     <TableHead>Data Pagamento</TableHead>
                     <TableHead>Forma</TableHead>
-                    <TableHead>Status</TableHead>
                     <TableHead className="text-right">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -617,14 +573,15 @@ function FinanceiroPageContent() {
                       <TableCell className="font-medium">{pagamento.aluno_nome}</TableCell>
                       <TableCell>{formatCurrency(pagamento.valor)}</TableCell>
                       <TableCell>
-                        {new Date(pagamento.ano_referencia, pagamento.mes_referencia - 1)
-                          .toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' })}
+                        {(() => {
+                          const { mes, ano } = parseMesReferencia(pagamento.mes_referencia)
+                          return new Date(ano, mes - 1).toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' })
+                        })()}
                       </TableCell>
                       <TableCell>
                         {pagamento.data_pagamento ? formatDate(pagamento.data_pagamento) : '-'}
                       </TableCell>
                       <TableCell>{getFormaPagamento(pagamento.forma_pagamento)}</TableCell>
-                      <TableCell>{getStatusBadge(pagamento.status)}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-2">
                           <Button
