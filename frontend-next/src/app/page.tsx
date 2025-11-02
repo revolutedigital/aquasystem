@@ -53,24 +53,73 @@ export default function DashboardPage() {
         .filter((p: Pagamento) => new Date(p.data_pagamento) >= trintaDiasAtras)
         .reduce((acc: number, p: Pagamento) => acc + p.valor, 0)
 
-      // Gerar dados do gráfico (últimos 6 meses)
+      // Gerar dados do gráfico (últimos 6 meses) - DADOS REAIS
       const last6Months = Array.from({ length: 6 }, (_, i) => {
         const date = new Date()
         date.setMonth(date.getMonth() - (5 - i))
+        const mesAno = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+
+        // Calcular receita do mês
+        const receitaMes = pagamentos
+          .filter((p: Pagamento) => {
+            const dataPag = new Date(p.data_pagamento)
+            const mesPag = `${dataPag.getFullYear()}-${String(dataPag.getMonth() + 1).padStart(2, '0')}`
+            return mesPag === mesAno
+          })
+          .reduce((acc: number, p: Pagamento) => acc + p.valor, 0)
+
+        // Calcular receita do mês anterior para comparação
+        const dateAnterior = new Date(date)
+        dateAnterior.setMonth(dateAnterior.getMonth() - 1)
+        const mesAnoAnterior = `${dateAnterior.getFullYear()}-${String(dateAnterior.getMonth() + 1).padStart(2, '0')}`
+
+        const receitaMesAnterior = pagamentos
+          .filter((p: Pagamento) => {
+            const dataPag = new Date(p.data_pagamento)
+            const mesPag = `${dataPag.getFullYear()}-${String(dataPag.getMonth() + 1).padStart(2, '0')}`
+            return mesPag === mesAnoAnterior
+          })
+          .reduce((acc: number, p: Pagamento) => acc + p.valor, 0)
+
         return {
           name: date.toLocaleDateString('pt-BR', { month: 'short' }),
-          value: Math.random() * 15000 + 8000, // Substituir com dados reais
-          previous: Math.random() * 12000 + 6000,
+          value: receitaMes,
+          previous: receitaMesAnterior,
         }
       })
+
+      // Calcular crescimento real (comparar mês atual com mês anterior)
+      const mesAtual = new Date()
+      const mesAnterior = new Date()
+      mesAnterior.setMonth(mesAnterior.getMonth() - 1)
+
+      const receitaMesAtual = pagamentos
+        .filter((p: Pagamento) => {
+          const dataPag = new Date(p.data_pagamento)
+          return dataPag.getMonth() === mesAtual.getMonth() &&
+                 dataPag.getFullYear() === mesAtual.getFullYear()
+        })
+        .reduce((acc: number, p: Pagamento) => acc + p.valor, 0)
+
+      const receitaMesPassado = pagamentos
+        .filter((p: Pagamento) => {
+          const dataPag = new Date(p.data_pagamento)
+          return dataPag.getMonth() === mesAnterior.getMonth() &&
+                 dataPag.getFullYear() === mesAnterior.getFullYear()
+        })
+        .reduce((acc: number, p: Pagamento) => acc + p.valor, 0)
+
+      const crescimentoReal = receitaMesPassado > 0
+        ? ((receitaMesAtual - receitaMesPassado) / receitaMesPassado) * 100
+        : 0
 
       setStats({
         totalAlunos: alunos.length,
         alunosAtivos,
         inadimplentes: inadimplentes.length,
         receitaMensal,
-        crescimento: 12.5,
-        taxaFrequencia: 87.3,
+        crescimento: Number(crescimentoReal.toFixed(1)),
+        taxaFrequencia: 0, // Removido - não temos dados de frequência real
       })
       setChartData(last6Months)
     } catch (error) {
