@@ -55,7 +55,7 @@ def init_db():
     Inicializa o banco de dados criando todas as tabelas.
     Esta função é chamada no startup da aplicação.
     """
-    from app.models import aluno, pagamento, horario, turma, user
+    from app.models import aluno, pagamento, horario, turma, user, plano
 
     # Criar todas as tabelas no banco
     Base.metadata.create_all(bind=engine)
