@@ -16,6 +16,14 @@ async def lifespan(app: FastAPI):
     """Gerenciador de ciclo de vida da aplicação"""
     # Startup: Inicializar banco de dados
     init_db()
+
+    # Executar migrações
+    try:
+        from app.migrate_add_plano_id import migrate
+        migrate()
+    except Exception as e:
+        print(f"⚠️  Aviso ao executar migração: {str(e)}")
+
     print("✅ Sistema inicializado com sucesso!")
     yield
     # Shutdown: cleanup se necessário
