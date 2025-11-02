@@ -6,7 +6,7 @@ import { DashboardLayout } from '@/components/layout/DashboardLayout'
 import { StatCard } from '@/components/ui/stat-card'
 import { RevenueChart } from '@/components/charts/RevenueChart'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { alunosAPI, pagamentosAPI } from '@/lib/api'
+import { alunosAPI, pagamentosAPI, horariosAPI } from '@/lib/api'
 import {
   Users,
   DollarSign,
@@ -20,6 +20,16 @@ import {
 } from 'lucide-react'
 import { Aluno, Pagamento } from '@/types'
 
+interface HorarioComAlunos {
+  id: number
+  dia_semana: string
+  horario: string
+  capacidade_maxima: number
+  tipo_aula: string
+  alunos: Aluno[]
+  vagas_disponiveis: number
+}
+
 export default function DashboardPage() {
   const [stats, setStats] = useState({
     totalAlunos: 0,
@@ -30,6 +40,7 @@ export default function DashboardPage() {
     taxaFrequencia: 0,
   })
   const [chartData, setChartData] = useState<{name: string; value: number; previous: number}[]>([])
+  const [horariosHoje, setHorariosHoje] = useState<HorarioComAlunos[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -38,11 +49,12 @@ export default function DashboardPage() {
 
   const loadDashboardData = async () => {
     try {
-      const [alunos, inadimplentes, pagamentos] = await Promise.all([
+      const [alunos, inadimplentes, pagamentos, horarios] = await Promise.all([
         alunosAPI.list(),
         alunosAPI.getInadimplentes(),
         pagamentosAPI.list(),
-      ]) as [Aluno[], Aluno[], Pagamento[]]
+        horariosAPI.getGradeCompleta(),
+      ]) as [Aluno[], Aluno[], Pagamento[], HorarioComAlunos[]]
 
       const alunosAtivos = alunos.filter((a: Aluno) => a.ativo).length
 
@@ -112,6 +124,17 @@ export default function DashboardPage() {
       const crescimentoReal = receitaMesPassado > 0
         ? ((receitaMesAtual - receitaMesPassado) / receitaMesPassado) * 100
         : 0
+
+      // Filtrar horários de hoje (por dia da semana)
+      const diasSemana = ['domingo', 'segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado']
+      const hoje = new Date()
+      const diaHoje = diasSemana[hoje.getDay()]
+
+      const horariosDeHoje = horarios
+        .filter((h: HorarioComAlunos) => h.dia_semana.toLowerCase() === diaHoje)
+        .sort((a: HorarioComAlunos, b: HorarioComAlunos) => a.horario.localeCompare(b.horario))
+
+      setHorariosHoje(horariosDeHoje)
 
       setStats({
         totalAlunos: alunos.length,
@@ -247,52 +270,53 @@ export default function DashboardPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {[
-                    { time: '08:00', class: 'Natação Infantil', students: 12, capacity: 15, level: 'Iniciante' },
-                    { time: '10:00', class: 'Hidroginástica', students: 20, capacity: 20, level: 'Todos' },
-                    { time: '14:00', class: 'Natação Adultos', students: 8, capacity: 12, level: 'Intermediário' },
-                    { time: '16:00', class: 'Natação Competição', students: 15, capacity: 15, level: 'Avançado' },
-                  ].map((aula, i) => (
-                    <motion.div
-                      key={i}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.4 + i * 0.1 }}
-                      className="flex items-center justify-between p-4 rounded-xl border hover:bg-accent/50 transition-all hover:shadow-md cursor-pointer group"
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className="flex items-center justify-center h-12 w-12 rounded-xl bg-gradient-to-br from-cyan-500/20 to-blue-500/20 group-hover:from-cyan-500/30 group-hover:to-blue-500/30 transition-colors">
-                          <Clock className="h-6 w-6 text-primary" />
-                        </div>
-                        <div>
-                          <p className="font-semibold">{aula.class}</p>
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <span>{aula.time}</span>
-                            <span>•</span>
-                            <span>{aula.level}</span>
+                  {horariosHoje.length === 0 ? (
+                    <p className="text-center text-muted-foreground py-8">
+                      Nenhum horário cadastrado para hoje
+                    </p>
+                  ) : (
+                    horariosHoje.map((horario, i) => (
+                      <motion.div
+                        key={horario.id}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.4 + i * 0.1 }}
+                        className="flex items-center justify-between p-4 rounded-xl border hover:bg-accent/50 transition-all hover:shadow-md cursor-pointer group"
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className="flex items-center justify-center h-12 w-12 rounded-xl bg-gradient-to-br from-cyan-500/20 to-blue-500/20 group-hover:from-cyan-500/30 group-hover:to-blue-500/30 transition-colors">
+                            <Clock className="h-6 w-6 text-primary" />
+                          </div>
+                          <div>
+                            <p className="font-semibold capitalize">{horario.tipo_aula}</p>
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                              <span>{horario.horario}</span>
+                              <span>•</span>
+                              <span className="capitalize">{horario.dia_semana}</span>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm font-medium">
-                          {aula.students}/{aula.capacity} alunos
-                        </p>
-                        <div className="flex items-center gap-1 mt-1">
-                          <div className="h-2 w-20 bg-muted rounded-full overflow-hidden">
-                            <motion.div
-                              className="h-full bg-gradient-to-r from-cyan-500 to-blue-500"
-                              initial={{ width: 0 }}
-                              animate={{ width: `${(aula.students / aula.capacity) * 100}%` }}
-                              transition={{ duration: 1, delay: 0.5 + i * 0.1 }}
-                            />
+                        <div className="text-right">
+                          <p className="text-sm font-medium">
+                            {horario.alunos.length}/{horario.capacidade_maxima} alunos
+                          </p>
+                          <div className="flex items-center gap-1 mt-1">
+                            <div className="h-2 w-20 bg-muted rounded-full overflow-hidden">
+                              <motion.div
+                                className="h-full bg-gradient-to-r from-cyan-500 to-blue-500"
+                                initial={{ width: 0 }}
+                                animate={{ width: `${(horario.alunos.length / horario.capacidade_maxima) * 100}%` }}
+                                transition={{ duration: 1, delay: 0.5 + i * 0.1 }}
+                              />
+                            </div>
+                            <span className="text-xs text-muted-foreground">
+                              {Math.round((horario.alunos.length / horario.capacidade_maxima) * 100)}%
+                            </span>
                           </div>
-                          <span className="text-xs text-muted-foreground">
-                            {Math.round((aula.students / aula.capacity) * 100)}%
-                          </span>
                         </div>
-                      </div>
-                    </motion.div>
-                  ))}
+                      </motion.div>
+                    ))
+                  )}
                 </div>
               </CardContent>
             </Card>
