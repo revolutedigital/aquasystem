@@ -127,7 +127,6 @@ export default function DashboardPage() {
 
       // Filtrar horários de hoje (por dia da semana)
       const diasSemana = ['domingo', 'segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado']
-      const hoje = new Date()
       const diaHoje = diasSemana[hoje.getDay()]
 
       const horariosDeHoje = horarios
