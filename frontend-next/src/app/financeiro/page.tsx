@@ -124,17 +124,24 @@ function FinanceiroPageContent() {
         alunosAPI.list()
       ])
 
-      // Não usar dados mockados - usar lista vazia se falhar
-      setPagamentos(pagamentosData || [])
+      // Mapear pagamentos com nome do aluno
+      const pagamentosComNome = (pagamentosData || []).map((p: any) => {
+        const aluno = alunosData.find((a: Aluno) => a.id === p.aluno_id)
+        return {
+          ...p,
+          aluno_nome: aluno?.nome_completo || 'Aluno não encontrado'
+        }
+      })
+
+      setPagamentos(pagamentosComNome)
       setAlunos(alunosData || [])
 
-      // Calcular stats
-      const pagamentosList = pagamentosData || []
+      // Calcular stats usando pagamentosComNome
       const mesReferenciaAtual = `${filterYear}-${String(filterMonth).padStart(2, '0')}`
 
-      const total = pagamentosList.reduce((acc: number, p: PagamentoComNome) => acc + p.valor, 0)
+      const total = pagamentosComNome.reduce((acc: number, p: PagamentoComNome) => acc + p.valor, 0)
 
-      const mesAtual = pagamentosList
+      const mesAtual = pagamentosComNome
         .filter((p: PagamentoComNome) => p.mes_referencia === mesReferenciaAtual)
         .reduce((acc: number, p: PagamentoComNome) => acc + p.valor, 0)
 
