@@ -1,11 +1,13 @@
 """
 Rotas de Autenticação e Autorização
 """
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
 from typing import Optional
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 
 from app.database import get_db
 from app.models.user import User
@@ -14,6 +16,7 @@ from app.utils.auth import verify_password, create_access_token, decode_access_t
 
 router = APIRouter()
 security = HTTPBearer()
+limiter = Limiter(key_func=get_remote_address)
 
 
 def get_current_user(
@@ -89,11 +92,14 @@ def require_role(allowed_roles: list[str]):
 
 
 @router.post("/auth/login", response_model=Token)
-async def login(user_credentials: UserLogin, db: Session = Depends(get_db)):
+@limiter.limit("5/minute")  # Máximo 5 tentativas de login por minuto
+async def login(request: Request, user_credentials: UserLogin, db: Session = Depends(get_db)):
     """
     Endpoint de login - retorna token JWT
+    Rate Limited: 5 tentativas por minuto por IP
 
     Args:
+        request: Request object (necessário para rate limiting)
         user_credentials: Email e senha do usuário
         db: Sessão do banco de dados
 
@@ -101,7 +107,7 @@ async def login(user_credentials: UserLogin, db: Session = Depends(get_db)):
         Token: Token JWT e informações do usuário
 
     Raises:
-        HTTPException: Se credenciais inválidas
+        HTTPException: Se credenciais inválidas ou rate limit excedido
     """
     # Buscar usuário por email
     user = db.query(User).filter(User.email == user_credentials.email).first()
