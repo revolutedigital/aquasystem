@@ -9,8 +9,11 @@ from app.database import get_db
 from app.routes.auth import require_role
 from app.models.aluno import Aluno
 from app.models.pagamento import Pagamento
+from app.models.turma import AlunoHorario
+from app.models.horario import Horario
 from app.schemas.aluno import AlunoCreate, AlunoUpdate, AlunoResponse, AlunoComPagamentos
 from app.schemas.pagamento import PagamentoResponse
+from app.schemas.horario import HorarioResponse
 
 
 router = APIRouter(
@@ -143,3 +146,23 @@ async def listar_pagamentos_aluno(id: int, db: Session = Depends(get_db)):
     ).order_by(Pagamento.data_pagamento.desc()).all()
 
     return pagamentos
+
+
+@router.get("/alunos/{id}/horarios", response_model=List[HorarioResponse])
+async def listar_horarios_aluno(id: int, db: Session = Depends(get_db)):
+    """Listar todos os horários em que um aluno está matriculado"""
+    # Verificar se aluno existe
+    aluno = db.query(Aluno).filter(Aluno.id == id).first()
+    if not aluno:
+        raise HTTPException(status_code=404, detail="Aluno não encontrado")
+
+    # Buscar horários matriculados via relacionamento AlunoHorario
+    matriculas = db.query(AlunoHorario).filter(AlunoHorario.aluno_id == id).all()
+    horarios = []
+
+    for matricula in matriculas:
+        horario = db.query(Horario).filter(Horario.id == matricula.horario_id).first()
+        if horario:
+            horarios.append(horario)
+
+    return horarios

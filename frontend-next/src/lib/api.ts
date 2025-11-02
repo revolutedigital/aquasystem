@@ -62,6 +62,7 @@ export const alunosAPI = {
   delete: (id: number) => api.delete(`/api/alunos/${id}`).then(res => res.data),
   getInadimplentes: () => api.get('/api/alunos/inadimplentes').then(res => res.data),
   getPagamentos: (id: number) => api.get(`/api/alunos/${id}/pagamentos`).then(res => res.data),
+  getHorarios: (id: number) => api.get(`/api/alunos/${id}/horarios`).then(res => res.data),
 }
 
 export const turmasAPI = {
@@ -100,6 +101,12 @@ export const horariosAPI = {
   create: (data: HorarioCreateData) => api.post('/api/horarios', data).then(res => res.data),
   update: (id: number, data: Partial<HorarioCreateData>) => api.put(`/api/horarios/${id}`, data).then(res => res.data),
   delete: (id: number) => api.delete(`/api/horarios/${id}`).then(res => res.data),
+  getGradeCompleta: () => api.get('/api/horarios/grade-completa').then(res => res.data),
+  getVagas: (id: number) => api.get(`/api/horarios/${id}/vagas`).then(res => res.data),
+  addAluno: (horarioId: number, alunoId: number) =>
+    api.post(`/api/horarios/${horarioId}/alunos/${alunoId}`).then(res => res.data),
+  removeAluno: (horarioId: number, alunoId: number) =>
+    api.delete(`/api/horarios/${horarioId}/alunos/${alunoId}`).then(res => res.data),
 }
 
 export const planosAPI = {

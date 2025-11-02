@@ -35,6 +35,7 @@ import {
 } from '@/components/ui/select'
 import { toast } from 'sonner'
 import { horariosAPI } from '@/lib/api'
+import { EnrollmentDialog } from '@/components/EnrollmentDialog'
 
 interface HorarioDetalhado {
   id: number
@@ -80,6 +81,7 @@ function HorariosPageContent() {
   const [loading, setLoading] = useState(true)
   const [viewMode, setViewMode] = useState<'week' | 'list'>('week')
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
+  const [isEnrollmentDialogOpen, setIsEnrollmentDialogOpen] = useState(false)
   const [selectedHorario, setSelectedHorario] = useState<HorarioDetalhado | null>(null)
 
   // Form state
@@ -217,29 +219,51 @@ function HorariosPageContent() {
                         <motion.div
                           initial={{ opacity: 0, scale: 0.9 }}
                           animate={{ opacity: 1, scale: 1 }}
-                          className="bg-primary text-white rounded-lg p-2 cursor-pointer hover:opacity-90 transition-opacity"
-                          onClick={() => {
-                            setSelectedHorario(horario)
-                            setFormData({
-                              dia_semana: horario.dia_semana,
-                              hora_inicio: horario.horario || horario.hora_inicio || '',
-                              hora_fim: horario.hora_fim || '',
-                              turma: horario.turma || '',
-                              professor: horario.professor || '',
-                              nivel: horario.nivel || 'Iniciante',
-                              sala_piscina: horario.sala_piscina || '',
-                              capacidade: horario.capacidade_maxima || horario.capacidade || 10,
-                              alunos_matriculados: horario.alunos_matriculados || 0
-                            })
-                            setIsAddModalOpen(true)
-                          }}
+                          className="bg-primary text-white rounded-lg p-2 hover:opacity-90 transition-opacity group relative"
                         >
                           <div className="text-xs font-semibold">
                             {horario.tipo_aula === 'natacao' ? 'Natação' : 'Hidroginástica'}
                           </div>
-                          <div className="text-xs mt-1">
-                            <Users className="inline h-3 w-3 mr-1" />
-                            {horario.alunos_matriculados || 0}/{horario.capacidade_maxima || horario.capacidade}
+                          <div className="text-xs mt-1 flex items-center justify-between">
+                            <span>
+                              <Users className="inline h-3 w-3 mr-1" />
+                              {horario.alunos_matriculados || 0}/{horario.capacidade_maxima || horario.capacidade}
+                            </span>
+                          </div>
+                          <div className="absolute inset-0 bg-black/50 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
+                            <Button
+                              size="icon"
+                              variant="secondary"
+                              className="h-7 w-7"
+                              onClick={() => {
+                                setSelectedHorario(horario)
+                                setIsEnrollmentDialogOpen(true)
+                              }}
+                            >
+                              <Users className="h-3 w-3" />
+                            </Button>
+                            <Button
+                              size="icon"
+                              variant="secondary"
+                              className="h-7 w-7"
+                              onClick={() => {
+                                setSelectedHorario(horario)
+                                setFormData({
+                                  dia_semana: horario.dia_semana,
+                                  hora_inicio: horario.horario || horario.hora_inicio || '',
+                                  hora_fim: horario.hora_fim || '',
+                                  turma: horario.turma || '',
+                                  professor: horario.professor || '',
+                                  nivel: horario.nivel || 'Iniciante',
+                                  sala_piscina: horario.sala_piscina || '',
+                                  capacidade: horario.capacidade_maxima || horario.capacidade || 10,
+                                  alunos_matriculados: horario.alunos_matriculados || 0
+                                })
+                                setIsAddModalOpen(true)
+                              }}
+                            >
+                              <Edit className="h-3 w-3" />
+                            </Button>
                           </div>
                         </motion.div>
                       ) : (
@@ -316,6 +340,17 @@ function HorariosPageContent() {
                   </div>
                 </div>
                 <div className="flex gap-2">
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    onClick={() => {
+                      setSelectedHorario(horario)
+                      setIsEnrollmentDialogOpen(true)
+                    }}
+                    title="Gerenciar alunos"
+                  >
+                    <Users className="h-4 w-4 text-blue-600" />
+                  </Button>
                   <Button
                     size="icon"
                     variant="ghost"
@@ -623,6 +658,23 @@ function HorariosPageContent() {
         <WeekView />
       ) : (
         <ListView />
+      )}
+
+      {/* Enrollment Dialog */}
+      {selectedHorario && (
+        <EnrollmentDialog
+          open={isEnrollmentDialogOpen}
+          onOpenChange={setIsEnrollmentDialogOpen}
+          horarioId={selectedHorario.id}
+          horarioInfo={{
+            id: selectedHorario.id,
+            dia_semana: selectedHorario.dia_semana,
+            horario: selectedHorario.horario || selectedHorario.hora_inicio || '',
+            capacidade_maxima: selectedHorario.capacidade_maxima || selectedHorario.capacidade || 10,
+            tipo_aula: selectedHorario.tipo_aula || ''
+          }}
+          onEnrollmentChange={loadHorarios}
+        />
       )}
     </div>
   )
