@@ -30,6 +30,9 @@ interface RevenueChartProps {
 }
 
 export function RevenueChart({ data, title, type = 'area' }: RevenueChartProps) {
+  // Validação de dados para evitar erros de SVG path
+  const chartData = data && data.length > 0 ? data : [{ name: 'Sem dados', value: 0 }]
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
@@ -63,7 +66,7 @@ export function RevenueChart({ data, title, type = 'area' }: RevenueChartProps) 
         <CardContent>
           <ResponsiveContainer width="100%" height={300}>
             {type === 'area' ? (
-              <AreaChart data={data}>
+              <AreaChart data={chartData}>
                 <defs>
                   <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#06B6D4" stopOpacity={0.3} />
@@ -95,7 +98,7 @@ export function RevenueChart({ data, title, type = 'area' }: RevenueChartProps) 
                   fill="url(#colorValue)"
                   animationDuration={1500}
                 />
-                {data[0]?.previous !== undefined && (
+                {chartData[0]?.previous !== undefined && (
                   <Area
                     type="monotone"
                     dataKey="previous"
@@ -109,7 +112,7 @@ export function RevenueChart({ data, title, type = 'area' }: RevenueChartProps) 
                 )}
               </AreaChart>
             ) : type === 'line' ? (
-              <LineChart data={data}>
+              <LineChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
                 <XAxis
                   dataKey="name"
@@ -131,7 +134,7 @@ export function RevenueChart({ data, title, type = 'area' }: RevenueChartProps) 
                   activeDot={{ r: 7 }}
                   animationDuration={1500}
                 />
-                {data[0]?.previous !== undefined && (
+                {chartData[0]?.previous !== undefined && (
                   <Line
                     type="monotone"
                     dataKey="previous"
@@ -144,7 +147,7 @@ export function RevenueChart({ data, title, type = 'area' }: RevenueChartProps) 
                 )}
               </LineChart>
             ) : (
-              <BarChart data={data}>
+              <BarChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
                 <XAxis
                   dataKey="name"
@@ -163,7 +166,7 @@ export function RevenueChart({ data, title, type = 'area' }: RevenueChartProps) 
                   radius={[8, 8, 0, 0]}
                   animationDuration={1500}
                 />
-                {data[0]?.previous !== undefined && (
+                {chartData[0]?.previous !== undefined && (
                   <Bar
                     dataKey="previous"
                     fill="#94A3B8"
@@ -182,7 +185,7 @@ export function RevenueChart({ data, title, type = 'area' }: RevenueChartProps) 
               <div className="w-3 h-3 rounded-full bg-primary" />
               <span className="text-sm text-muted-foreground">Atual</span>
             </div>
-            {data[0]?.previous !== undefined && (
+            {chartData[0]?.previous !== undefined && (
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 rounded-full bg-muted-foreground opacity-50" />
                 <span className="text-sm text-muted-foreground">Anterior</span>

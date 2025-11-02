@@ -53,6 +53,7 @@ if os.getenv("RAILWAY_ENVIRONMENT"):
     railway_origins = [
         "https://frontend-production-ef47.up.railway.app",
         "https://frontend-next-production.up.railway.app",
+        "https://aquaflow.up.railway.app",
     ]
     ALLOWED_ORIGINS.extend(railway_origins)
 

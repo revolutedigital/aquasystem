@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from typing import List
 
 from app.database import get_db
-from app.auth import require_role
+from app.utils.auth import require_role
 from app.models.plano import Plano
 from app.schemas.plano import PlanoCreate, PlanoUpdate, PlanoResponse
 
