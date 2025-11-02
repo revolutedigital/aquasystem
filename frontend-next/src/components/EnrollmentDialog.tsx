@@ -208,7 +208,7 @@ export function EnrollmentDialog({
                 </Select>
                 <Button
                   onClick={handleAddAluno}
-                  disabled={!selectedAlunoId || adding || (vagas && vagas.vagas_disponiveis <= 0)}
+                  disabled={!selectedAlunoId || adding || (vagas?.vagas_disponiveis ?? 0) <= 0}
                   size="icon"
                 >
                   {adding ? (
