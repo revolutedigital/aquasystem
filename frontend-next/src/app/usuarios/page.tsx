@@ -51,16 +51,14 @@ import { usersAPI, type Usuario, type UsuarioCreate, type UsuarioUpdate } from '
 
 const roleLabels: Record<string, string> = {
   admin: 'Administrador',
-  professor: 'Professor',
-  atendente: 'Atendente',
-  user: 'Usuário'
+  recepcionista: 'Recepcionista',
+  aluno: 'Aluno'
 }
 
 const roleColors: Record<string, string> = {
   admin: 'bg-purple-500',
-  professor: 'bg-blue-500',
-  atendente: 'bg-green-500',
-  user: 'bg-gray-500'
+  recepcionista: 'bg-blue-500',
+  aluno: 'bg-green-500'
 }
 
 export default function UsuariosPage() {
@@ -74,13 +72,12 @@ export default function UsuariosPage() {
 
   // Form state
   const [formData, setFormData] = useState({
-    nome: '',
+    username: '',
+    full_name: '',
     email: '',
-    telefone: '',
-    role: 'user',
+    role: 'recepcionista',
     password: '',
-    confirmPassword: '',
-    ativo: true
+    confirmPassword: ''
   })
 
   const [passwordData, setPasswordData] = useState({
@@ -117,23 +114,21 @@ export default function UsuariosPage() {
       if (selectedUsuario) {
         // Atualizar usuário
         const updateData: UsuarioUpdate = {
-          nome: formData.nome,
+          username: formData.username,
+          full_name: formData.full_name,
           email: formData.email,
-          telefone: formData.telefone,
-          role: formData.role,
-          ativo: formData.ativo
+          role: formData.role
         }
         await usersAPI.update(selectedUsuario.id, updateData)
         toast.success('Usuário atualizado com sucesso!')
       } else {
         // Criar novo usuário
         const createData: UsuarioCreate = {
-          nome: formData.nome,
+          username: formData.username,
+          full_name: formData.full_name,
           email: formData.email,
           password: formData.password,
-          telefone: formData.telefone,
-          role: formData.role,
-          ativo: formData.ativo
+          role: formData.role
         }
         await usersAPI.create(createData)
         toast.success('Usuário cadastrado com sucesso!')
@@ -187,12 +182,12 @@ export default function UsuariosPage() {
     }
   }
 
-  const handleToggleStatus = async (id: number, ativo: boolean) => {
+  const handleToggleStatus = async (id: number, is_active: boolean) => {
     try {
       const usuario = usuarios.find(u => u.id === id)
       if (usuario) {
-        await usersAPI.update(id, { ativo })
-        toast.success(`Usuário ${ativo ? 'ativado' : 'desativado'} com sucesso!`)
+        await usersAPI.update(id, { is_active })
+        toast.success(`Usuário ${is_active ? 'ativado' : 'desativado'} com sucesso!`)
         loadUsuarios() // Recarregar lista
       }
     } catch (error) {
@@ -203,20 +198,20 @@ export default function UsuariosPage() {
 
   const resetForm = () => {
     setFormData({
-      nome: '',
+      username: '',
+      full_name: '',
       email: '',
-      telefone: '',
-      role: 'user',
+      role: 'recepcionista',
       password: '',
-      confirmPassword: '',
-      ativo: true
+      confirmPassword: ''
     })
     setSelectedUsuario(null)
   }
 
   const filteredUsuarios = usuarios.filter(usuario => {
-    const matchesSearch = usuario.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         usuario.email.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesSearch = usuario.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         usuario.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         usuario.username.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesRole = filterRole === 'all' || usuario.role === filterRole
     return matchesSearch && matchesRole
   })
@@ -278,11 +273,20 @@ export default function UsuariosPage() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="nome">Nome Completo*</Label>
+                  <Label htmlFor="full_name">Nome Completo*</Label>
                   <Input
-                    id="nome"
-                    value={formData.nome}
-                    onChange={(e) => setFormData({...formData, nome: e.target.value})}
+                    id="full_name"
+                    value={formData.full_name}
+                    onChange={(e) => setFormData({...formData, full_name: e.target.value})}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="username">Username*</Label>
+                  <Input
+                    id="username"
+                    value={formData.username}
+                    onChange={(e) => setFormData({...formData, username: e.target.value})}
                     required
                   />
                 </div>
@@ -297,14 +301,6 @@ export default function UsuariosPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="telefone">Telefone</Label>
-                  <Input
-                    id="telefone"
-                    value={formData.telefone}
-                    onChange={(e) => setFormData({...formData, telefone: e.target.value})}
-                  />
-                </div>
-                <div className="space-y-2">
                   <Label htmlFor="role">Perfil*</Label>
                   <Select
                     value={formData.role}
@@ -315,9 +311,7 @@ export default function UsuariosPage() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="admin">Administrador</SelectItem>
-                      <SelectItem value="professor">Professor</SelectItem>
-                      <SelectItem value="atendente">Atendente</SelectItem>
-                      <SelectItem value="user">Usuário</SelectItem>
+                      <SelectItem value="recepcionista">Recepcionista</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -345,14 +339,6 @@ export default function UsuariosPage() {
                     </div>
                   </>
                 )}
-                <div className="col-span-2 flex items-center space-x-2">
-                  <Switch
-                    id="ativo"
-                    checked={formData.ativo}
-                    onCheckedChange={(checked) => setFormData({...formData, ativo: checked})}
-                  />
-                  <Label htmlFor="ativo">Usuário ativo</Label>
-                </div>
               </div>
               <div className="flex justify-end gap-3">
                 <Button
@@ -376,7 +362,7 @@ export default function UsuariosPage() {
             <DialogHeader>
               <DialogTitle>Alterar Senha</DialogTitle>
               <DialogDescription>
-                Digite a nova senha para o usuário {selectedUsuario?.nome}
+                Digite a nova senha para o usuário {selectedUsuario?.full_name}
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handlePasswordChange} className="space-y-4">
@@ -448,7 +434,7 @@ export default function UsuariosPage() {
               <div>
                 <p className="text-sm text-muted-foreground">Ativos</p>
                 <p className="text-2xl font-bold">
-                  {usuarios.filter(u => u.ativo).length}
+                  {usuarios.filter(u => u.is_active).length}
                 </p>
               </div>
               <CheckCircle className="h-8 w-8 text-green-500 opacity-50" />
@@ -514,9 +500,8 @@ export default function UsuariosPage() {
             <SelectContent>
               <SelectItem value="all">Todos</SelectItem>
               <SelectItem value="admin">Administradores</SelectItem>
-              <SelectItem value="professor">Professores</SelectItem>
-              <SelectItem value="atendente">Atendentes</SelectItem>
-              <SelectItem value="user">Usuários</SelectItem>
+              <SelectItem value="recepcionista">Recepcionistas</SelectItem>
+              <SelectItem value="aluno">Alunos</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -543,19 +528,17 @@ export default function UsuariosPage() {
             <TableBody>
               {filteredUsuarios.map((usuario) => (
                 <TableRow key={usuario.id}>
-                  <TableCell className="font-medium">{usuario.nome}</TableCell>
+                  <TableCell className="font-medium">{usuario.full_name}</TableCell>
                   <TableCell>
                     <div className="space-y-1">
                       <div className="flex items-center gap-1 text-sm">
                         <Mail className="h-3 w-3" />
                         {usuario.email}
                       </div>
-                      {usuario.telefone && (
-                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                          <Phone className="h-3 w-3" />
-                          {usuario.telefone}
-                        </div>
-                      )}
+                      <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                        <User className="h-3 w-3" />
+                        @{usuario.username}
+                      </div>
                     </div>
                   </TableCell>
                   <TableCell>
@@ -565,7 +548,7 @@ export default function UsuariosPage() {
                   </TableCell>
                   <TableCell>
                     <Switch
-                      checked={usuario.ativo}
+                      checked={usuario.is_active}
                       onCheckedChange={(checked) => handleToggleStatus(usuario.id, checked)}
                     />
                   </TableCell>
@@ -597,13 +580,12 @@ export default function UsuariosPage() {
                         onClick={() => {
                           setSelectedUsuario(usuario)
                           setFormData({
-                            nome: usuario.nome,
+                            username: usuario.username,
+                            full_name: usuario.full_name,
                             email: usuario.email,
-                            telefone: usuario.telefone || '',
                             role: usuario.role,
                             password: '',
-                            confirmPassword: '',
-                            ativo: usuario.ativo
+                            confirmPassword: ''
                           })
                           setIsAddModalOpen(true)
                         }}

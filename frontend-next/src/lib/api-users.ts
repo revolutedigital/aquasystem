@@ -2,30 +2,31 @@ import api from './api'
 
 export interface Usuario {
   id: number
-  nome: string
   email: string
-  telefone?: string
+  username: string
+  full_name: string
   role: string
-  ativo: boolean
+  is_active: boolean
+  is_superuser: boolean
   created_at: string
+  updated_at?: string
   last_login?: string
 }
 
 export interface UsuarioCreate {
-  nome: string
   email: string
+  username: string
+  full_name: string
   password: string
-  telefone?: string
   role: string
-  ativo: boolean
 }
 
 export interface UsuarioUpdate {
-  nome?: string
   email?: string
-  telefone?: string
+  username?: string
+  full_name?: string
   role?: string
-  ativo?: boolean
+  is_active?: boolean
 }
 
 export const usersAPI = {
