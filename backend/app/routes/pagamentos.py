@@ -56,51 +56,6 @@ async def listar_pagamentos(
     return pagamentos
 
 
-@router.get("/pagamentos/{id}", response_model=PagamentoResponse)
-async def obter_pagamento(id: int, db: Session = Depends(get_db)):
-    """Obter pagamento por ID"""
-    pagamento = db.query(Pagamento).filter(Pagamento.id == id).first()
-    if not pagamento:
-        raise HTTPException(status_code=404, detail="Pagamento não encontrado")
-    return pagamento
-
-
-@router.put("/pagamentos/{id}", response_model=PagamentoResponse)
-async def atualizar_pagamento(id: int, pagamento_update: PagamentoUpdate, db: Session = Depends(get_db)):
-    """Atualizar pagamento"""
-    db_pagamento = db.query(Pagamento).filter(Pagamento.id == id).first()
-    if not db_pagamento:
-        raise HTTPException(status_code=404, detail="Pagamento não encontrado")
-
-    # Se está alterando aluno_id, verificar se novo aluno existe
-    if pagamento_update.aluno_id:
-        aluno = db.query(Aluno).filter(Aluno.id == pagamento_update.aluno_id).first()
-        if not aluno:
-            raise HTTPException(status_code=404, detail="Aluno não encontrado")
-
-    # Atualizar apenas campos fornecidos
-    update_data = pagamento_update.model_dump(exclude_unset=True)
-    for field, value in update_data.items():
-        setattr(db_pagamento, field, value)
-
-    db.commit()
-    db.refresh(db_pagamento)
-    return db_pagamento
-
-
-@router.delete("/pagamentos/{id}", status_code=200)
-async def deletar_pagamento(id: int, db: Session = Depends(get_db)):
-    """Deletar pagamento"""
-    db_pagamento = db.query(Pagamento).filter(Pagamento.id == id).first()
-    if not db_pagamento:
-        raise HTTPException(status_code=404, detail="Pagamento não encontrado")
-
-    db.delete(db_pagamento)
-    db.commit()
-
-    return {"message": "Pagamento deletado com sucesso", "id": id}
-
-
 @router.get("/pagamentos/relatorio-mensal", response_model=List[dict])
 async def relatorio_mensal(
     ano: Optional[int] = Query(None, description="Ano para o relatório"),
@@ -145,3 +100,48 @@ async def relatorio_mensal(
         })
 
     return resultado
+
+
+@router.get("/pagamentos/{id}", response_model=PagamentoResponse)
+async def obter_pagamento(id: int, db: Session = Depends(get_db)):
+    """Obter pagamento por ID"""
+    pagamento = db.query(Pagamento).filter(Pagamento.id == id).first()
+    if not pagamento:
+        raise HTTPException(status_code=404, detail="Pagamento não encontrado")
+    return pagamento
+
+
+@router.put("/pagamentos/{id}", response_model=PagamentoResponse)
+async def atualizar_pagamento(id: int, pagamento_update: PagamentoUpdate, db: Session = Depends(get_db)):
+    """Atualizar pagamento"""
+    db_pagamento = db.query(Pagamento).filter(Pagamento.id == id).first()
+    if not db_pagamento:
+        raise HTTPException(status_code=404, detail="Pagamento não encontrado")
+
+    # Se está alterando aluno_id, verificar se novo aluno existe
+    if pagamento_update.aluno_id:
+        aluno = db.query(Aluno).filter(Aluno.id == pagamento_update.aluno_id).first()
+        if not aluno:
+            raise HTTPException(status_code=404, detail="Aluno não encontrado")
+
+    # Atualizar apenas campos fornecidos
+    update_data = pagamento_update.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(db_pagamento, field, value)
+
+    db.commit()
+    db.refresh(db_pagamento)
+    return db_pagamento
+
+
+@router.delete("/pagamentos/{id}", status_code=200)
+async def deletar_pagamento(id: int, db: Session = Depends(get_db)):
+    """Deletar pagamento"""
+    db_pagamento = db.query(Pagamento).filter(Pagamento.id == id).first()
+    if not db_pagamento:
+        raise HTTPException(status_code=404, detail="Pagamento não encontrado")
+
+    db.delete(db_pagamento)
+    db.commit()
+
+    return {"message": "Pagamento deletado com sucesso", "id": id}
