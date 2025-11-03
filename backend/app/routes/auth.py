@@ -138,8 +138,8 @@ async def login(request: Request, user_credentials: UserLogin, db: Session = Dep
             detail="Usuário inativo. Contate o administrador.",
         )
 
-    # Criar token JWT
-    access_token_expires = timedelta(minutes=1440)  # 24 horas
+    # Criar token JWT com expiração de 1 hora
+    access_token_expires = timedelta(minutes=60)  # 1 hora (segurança aprimorada)
     access_token = create_access_token(
         data={
             "user_id": user.id,
@@ -157,7 +157,7 @@ async def login(request: Request, user_credentials: UserLogin, db: Session = Dep
     return Token(
         access_token=access_token,
         token_type="bearer",
-        expires_in=1440 * 60,  # segundos
+        expires_in=60 * 60,  # segundos (1 hora)
         user=UserResponse.model_validate(user)
     )
 
@@ -188,8 +188,8 @@ async def refresh_token(current_user: User = Depends(get_current_user), db: Sess
     Returns:
         Token: Novo token JWT
     """
-    # Criar novo token
-    access_token_expires = timedelta(minutes=1440)
+    # Criar novo token com expiração de 1 hora
+    access_token_expires = timedelta(minutes=60)
     access_token = create_access_token(
         data={
             "user_id": current_user.id,
@@ -203,6 +203,6 @@ async def refresh_token(current_user: User = Depends(get_current_user), db: Sess
     return Token(
         access_token=access_token,
         token_type="bearer",
-        expires_in=1440 * 60,
+        expires_in=60 * 60,  # segundos (1 hora)
         user=UserResponse.model_validate(current_user)
     )

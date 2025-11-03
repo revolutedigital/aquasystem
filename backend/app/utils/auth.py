@@ -13,7 +13,7 @@ load_dotenv()
 # Configurações de segurança
 SECRET_KEY = os.getenv("SECRET_KEY", "sua_chave_secreta_super_forte_aqui_mudar_em_producao")
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "1440"))  # 24 horas padrão
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "60"))  # 1 hora padrão (segurança)
 
 # Contexto para hash de senhas (bcrypt)
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
