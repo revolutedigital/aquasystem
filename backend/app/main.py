@@ -1,12 +1,14 @@
 """
 Aplicação principal FastAPI - Sistema de Gestão de Natação
 """
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
+from starlette.middleware.base import BaseHTTPMiddleware
 import os
 from app.database import init_db
 
@@ -47,6 +49,69 @@ def get_real_ip(request: Request) -> str:
 
     # Último fallback: IP direto da conexão
     return request.client.host if request.client else "unknown"
+
+
+# Middleware de segurança para CSRF Protection e Security Headers
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    """
+    Middleware para adicionar security headers e validar Origin/Referer
+    Proteção contra CSRF, XSS, Clickjacking, etc.
+    """
+
+    def __init__(self, app, allowed_origins: list):
+        super().__init__(app)
+        self.allowed_origins = set(allowed_origins)
+
+    async def dispatch(self, request: Request, call_next):
+        # Métodos que modificam dados (state-changing)
+        state_changing_methods = {"POST", "PUT", "DELETE", "PATCH"}
+
+        # Validar Origin/Referer para métodos que modificam dados
+        if request.method in state_changing_methods:
+            origin = request.headers.get("Origin") or request.headers.get("Referer")
+
+            # Exceção: permitir requests sem Origin/Referer para certos endpoints
+            # (necessário para alguns clientes como cURL, testes, etc.)
+            allowed_without_origin = {
+                "/api/auth/login",  # Login pode não ter Origin em alguns casos
+                "/health",
+                "/"
+            }
+
+            if request.url.path not in allowed_without_origin:
+                if not origin:
+                    return JSONResponse(
+                        status_code=status.HTTP_403_FORBIDDEN,
+                        content={"detail": "Missing Origin or Referer header"}
+                    )
+
+                # Normalizar origin (remover trailing slash e path)
+                if origin:
+                    # Se for Referer, extrair apenas o origin
+                    if origin.startswith("http"):
+                        from urllib.parse import urlparse
+                        parsed = urlparse(origin)
+                        origin = f"{parsed.scheme}://{parsed.netloc}"
+
+                # Validar se origin está na lista permitida
+                if origin not in self.allowed_origins:
+                    return JSONResponse(
+                        status_code=status.HTTP_403_FORBIDDEN,
+                        content={"detail": f"Origin {origin} not allowed"}
+                    )
+
+        # Processar request
+        response = await call_next(request)
+
+        # Adicionar Security Headers
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["X-XSS-Protection"] = "1; mode=block"
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
+
+        return response
 
 
 # Configurar rate limiter com função customizada para proxies
@@ -100,6 +165,18 @@ app.add_middleware(
     expose_headers=["*"],
 )
 
+# Adicionar Security Headers Middleware (CSRF Protection + Security Headers)
+app.add_middleware(SecurityHeadersMiddleware, allowed_origins=ALLOWED_ORIGINS)
+
+print("🛡️  Security Headers Middleware ativado:")
+print("   ✅ CSRF Protection via Origin/Referer validation")
+print("   ✅ X-Content-Type-Options: nosniff")
+print("   ✅ X-Frame-Options: DENY")
+print("   ✅ X-XSS-Protection: 1; mode=block")
+print("   ✅ Strict-Transport-Security (HSTS)")
+print("   ✅ Referrer-Policy")
+print("   ✅ Permissions-Policy")
+
 # Importar e incluir routers
 from app.routes import alunos, pagamentos, horarios, auth, users, planos
 
@@ -122,13 +199,16 @@ async def root(request: Request):
         "message": "API Sistema de Natação v2.0",
         "version": "2.0",
         "features": [
-            "Autenticação JWT",
+            "Autenticação JWT (1 hora)",
             "Gerenciamento de Usuários",
             "CRUD de Alunos",
             "CRUD de Pagamentos",
             "CRUD de Horários",
-            "Rate Limiting",
-            "CORS Restrito"
+            "Rate Limiting (5/min login)",
+            "CORS Restrito",
+            "CSRF Protection",
+            "Security Headers (HSTS, XSS, etc)",
+            "Password Strength Validation"
         ],
         "docs": "/docs"
     }
