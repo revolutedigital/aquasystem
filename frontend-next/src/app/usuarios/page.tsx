@@ -14,7 +14,9 @@ import {
   User,
   CheckCircle,
   Search,
-  ArrowLeft
+  ArrowLeft,
+  Check,
+  X
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -58,6 +60,106 @@ const roleColors: Record<string, string> = {
   admin: 'bg-purple-500',
   recepcionista: 'bg-blue-500',
   aluno: 'bg-green-500'
+}
+
+// Password validation utilities
+interface PasswordValidation {
+  isValid: boolean
+  errors: string[]
+  strength: 'weak' | 'medium' | 'strong'
+}
+
+function validatePasswordStrength(password: string): PasswordValidation {
+  const errors: string[] = []
+
+  if (password.length < 12) {
+    errors.push("Mínimo 12 caracteres")
+  }
+  if (!/[A-Z]/.test(password)) {
+    errors.push("Pelo menos 1 letra maiúscula")
+  }
+  if (!/[a-z]/.test(password)) {
+    errors.push("Pelo menos 1 letra minúscula")
+  }
+  if (!/\d/.test(password)) {
+    errors.push("Pelo menos 1 número")
+  }
+  if (!/[!@#$%^&*(),.?":{}|<>_\-+=\[\]\\\/~`]/.test(password)) {
+    errors.push("Pelo menos 1 caractere especial")
+  }
+
+  const isValid = errors.length === 0
+  let strength: 'weak' | 'medium' | 'strong' = 'weak'
+
+  if (isValid) {
+    strength = 'strong'
+  } else if (errors.length <= 2 && password.length >= 8) {
+    strength = 'medium'
+  }
+
+  return { isValid, errors, strength }
+}
+
+// Password Strength Indicator Component
+function PasswordStrengthIndicator({ password }: { password: string }) {
+  if (!password) return null
+
+  const validation = validatePasswordStrength(password)
+  const requirements = [
+    { text: "Mínimo 12 caracteres", valid: password.length >= 12 },
+    { text: "1 letra maiúscula", valid: /[A-Z]/.test(password) },
+    { text: "1 letra minúscula", valid: /[a-z]/.test(password) },
+    { text: "1 número", valid: /\d/.test(password) },
+    { text: "1 caractere especial", valid: /[!@#$%^&*(),.?":{}|<>_\-+=\[\]\\\/~`]/.test(password) }
+  ]
+
+  const strengthColors = {
+    weak: 'bg-red-500',
+    medium: 'bg-yellow-500',
+    strong: 'bg-green-500'
+  }
+
+  const strengthLabels = {
+    weak: 'Fraca',
+    medium: 'Média',
+    strong: 'Forte'
+  }
+
+  return (
+    <div className="space-y-3 mt-2 p-3 bg-muted/30 rounded-lg border">
+      <div className="flex items-center gap-2">
+        <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
+          <div
+            className={`h-full transition-all ${strengthColors[validation.strength]}`}
+            style={{
+              width: validation.strength === 'strong' ? '100%' : validation.strength === 'medium' ? '60%' : '30%'
+            }}
+          />
+        </div>
+        <span className={`text-sm font-medium ${
+          validation.strength === 'strong' ? 'text-green-600' :
+          validation.strength === 'medium' ? 'text-yellow-600' :
+          'text-red-600'
+        }`}>
+          {strengthLabels[validation.strength]}
+        </span>
+      </div>
+      <div className="space-y-1">
+        {requirements.map((req, index) => (
+          <div key={index} className="flex items-center gap-2 text-xs">
+            {req.valid ? (
+              <Check className="h-3 w-3 text-green-600" />
+            ) : (
+              <X className="h-3 w-3 text-muted-foreground" />
+            )}
+            <span className={req.valid ? 'text-green-600' : 'text-muted-foreground'}>
+              {req.text}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
 }
 
 export default function UsuariosPage() {
@@ -109,6 +211,15 @@ export default function UsuariosPage() {
       return
     }
 
+    // Validate password strength for new users
+    if (!selectedUsuario) {
+      const validation = validatePasswordStrength(formData.password)
+      if (!validation.isValid) {
+        toast.error(`Senha fraca: ${validation.errors.join('; ')}`)
+        return
+      }
+    }
+
     try {
       if (selectedUsuario) {
         // Atualizar usuário
@@ -149,8 +260,10 @@ export default function UsuariosPage() {
       return
     }
 
-    if (passwordData.newPassword.length < 6) {
-      toast.error('A senha deve ter pelo menos 6 caracteres!')
+    // Validate password strength
+    const validation = validatePasswordStrength(passwordData.newPassword)
+    if (!validation.isValid) {
+      toast.error(`Senha fraca: ${validation.errors.join('; ')}`)
       return
     }
 
@@ -316,7 +429,7 @@ export default function UsuariosPage() {
                 </div>
                 {!selectedUsuario && (
                   <>
-                    <div className="space-y-2">
+                    <div className="col-span-2 space-y-2">
                       <Label htmlFor="password">Senha*</Label>
                       <Input
                         id="password"
@@ -325,8 +438,9 @@ export default function UsuariosPage() {
                         onChange={(e) => setFormData({...formData, password: e.target.value})}
                         required={!selectedUsuario}
                       />
+                      <PasswordStrengthIndicator password={formData.password} />
                     </div>
-                    <div className="space-y-2">
+                    <div className="col-span-2 space-y-2">
                       <Label htmlFor="confirmPassword">Confirmar Senha*</Label>
                       <Input
                         id="confirmPassword"
@@ -335,6 +449,21 @@ export default function UsuariosPage() {
                         onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
                         required={!selectedUsuario}
                       />
+                      {formData.password && formData.confirmPassword && (
+                        <div className="flex items-center gap-2 text-sm mt-2">
+                          {formData.password === formData.confirmPassword ? (
+                            <>
+                              <Check className="h-4 w-4 text-green-600" />
+                              <span className="text-green-600">As senhas coincidem</span>
+                            </>
+                          ) : (
+                            <>
+                              <X className="h-4 w-4 text-red-600" />
+                              <span className="text-red-600">As senhas não coincidem</span>
+                            </>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </>
                 )}
@@ -374,6 +503,7 @@ export default function UsuariosPage() {
                   onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
                   required
                 />
+                <PasswordStrengthIndicator password={passwordData.newPassword} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="confirmNewPassword">Confirmar Nova Senha*</Label>
@@ -384,6 +514,21 @@ export default function UsuariosPage() {
                   onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
                   required
                 />
+                {passwordData.newPassword && passwordData.confirmPassword && (
+                  <div className="flex items-center gap-2 text-sm mt-2">
+                    {passwordData.newPassword === passwordData.confirmPassword ? (
+                      <>
+                        <Check className="h-4 w-4 text-green-600" />
+                        <span className="text-green-600">As senhas coincidem</span>
+                      </>
+                    ) : (
+                      <>
+                        <X className="h-4 w-4 text-red-600" />
+                        <span className="text-red-600">As senhas não coincidem</span>
+                      </>
+                    )}
+                  </div>
+                )}
               </div>
               <div className="flex justify-end gap-3">
                 <Button

@@ -1,9 +1,10 @@
 """
 Schemas Pydantic para Usuários
 """
-from pydantic import BaseModel, Field, EmailStr
+from pydantic import BaseModel, Field, EmailStr, field_validator
 from datetime import datetime
 from typing import Optional
+import re
 
 
 class UserBase(BaseModel):
@@ -16,7 +17,40 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     """Schema para criação de User"""
-    password: str = Field(..., min_length=6, max_length=100, description="Senha (mínimo 6 caracteres)")
+    password: str = Field(..., min_length=12, max_length=100, description="Senha forte (mínimo 12 caracteres)")
+
+    @field_validator('password')
+    @classmethod
+    def validate_password_strength(cls, v: str) -> str:
+        """
+        Valida força da senha:
+        - Mínimo 12 caracteres
+        - Pelo menos 1 letra maiúscula
+        - Pelo menos 1 letra minúscula
+        - Pelo menos 1 número
+        - Pelo menos 1 caractere especial
+        """
+        errors = []
+
+        if len(v) < 12:
+            errors.append("Senha deve ter no mínimo 12 caracteres")
+
+        if not re.search(r"[A-Z]", v):
+            errors.append("Senha deve conter pelo menos uma letra maiúscula")
+
+        if not re.search(r"[a-z]", v):
+            errors.append("Senha deve conter pelo menos uma letra minúscula")
+
+        if not re.search(r"\d", v):
+            errors.append("Senha deve conter pelo menos um número")
+
+        if not re.search(r"[!@#$%^&*(),.?\":{}|<>_\-+=\[\]\\\/~`]", v):
+            errors.append("Senha deve conter pelo menos um caractere especial (!@#$%^&* etc)")
+
+        if errors:
+            raise ValueError("; ".join(errors))
+
+        return v
 
 
 class UserUpdate(BaseModel):
@@ -25,9 +59,38 @@ class UserUpdate(BaseModel):
     username: Optional[str] = Field(None, min_length=3, max_length=100)
     full_name: Optional[str] = Field(None, min_length=1, max_length=200)
     role: Optional[str] = Field(None, pattern="^(admin|recepcionista|aluno)$")
-    password: Optional[str] = Field(None, min_length=6, max_length=100)
+    password: Optional[str] = Field(None, min_length=12, max_length=100, description="Senha forte (mínimo 12 caracteres)")
     is_active: Optional[bool] = None
     is_superuser: Optional[bool] = None
+
+    @field_validator('password')
+    @classmethod
+    def validate_password_strength(cls, v: Optional[str]) -> Optional[str]:
+        """Valida força da senha se fornecida"""
+        if v is None:
+            return v
+
+        errors = []
+
+        if len(v) < 12:
+            errors.append("Senha deve ter no mínimo 12 caracteres")
+
+        if not re.search(r"[A-Z]", v):
+            errors.append("Senha deve conter pelo menos uma letra maiúscula")
+
+        if not re.search(r"[a-z]", v):
+            errors.append("Senha deve conter pelo menos uma letra minúscula")
+
+        if not re.search(r"\d", v):
+            errors.append("Senha deve conter pelo menos um número")
+
+        if not re.search(r"[!@#$%^&*(),.?\":{}|<>_\-+=\[\]\\\/~`]", v):
+            errors.append("Senha deve conter pelo menos um caractere especial (!@#$%^&* etc)")
+
+        if errors:
+            raise ValueError("; ".join(errors))
+
+        return v
 
 
 class UserResponse(BaseModel):
