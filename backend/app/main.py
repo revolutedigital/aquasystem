@@ -73,7 +73,6 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
             # Exceção: permitir requests sem Origin/Referer para certos endpoints
             # (necessário para alguns clientes como cURL, testes, etc.)
             allowed_without_origin = {
-                "/api/auth/login",  # Login pode não ter Origin em alguns casos
                 "/health",
                 "/"
             }
