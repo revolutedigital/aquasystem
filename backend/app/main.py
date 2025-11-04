@@ -74,23 +74,18 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
             # (necessário para alguns clientes como cURL, testes, etc.)
             allowed_without_origin = {
                 "/health",
-                "/"
+                "/",
+                "/api/auth/login"  # Permitir login sem Origin (Safari em modo privado)
             }
 
-            if request.url.path not in allowed_without_origin:
-                if not origin:
-                    return JSONResponse(
-                        status_code=status.HTTP_403_FORBIDDEN,
-                        content={"detail": "Missing Origin or Referer header"}
-                    )
-
+            # Se Origin/Referer estiver presente, validar
+            # Se não estiver presente, só bloquear se não for endpoint permitido
+            if origin:
                 # Normalizar origin (remover trailing slash e path)
-                if origin:
-                    # Se for Referer, extrair apenas o origin
-                    if origin.startswith("http"):
-                        from urllib.parse import urlparse
-                        parsed = urlparse(origin)
-                        origin = f"{parsed.scheme}://{parsed.netloc}"
+                if origin.startswith("http"):
+                    from urllib.parse import urlparse
+                    parsed = urlparse(origin)
+                    origin = f"{parsed.scheme}://{parsed.netloc}"
 
                 # Validar se origin está na lista permitida
                 if origin not in self.allowed_origins:
@@ -98,6 +93,18 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
                         status_code=status.HTTP_403_FORBIDDEN,
                         content={"detail": f"Origin {origin} not allowed"}
                     )
+            else:
+                # Sem Origin/Referer - bloquear apenas endpoints sensíveis
+                # Permitir login e endpoints na whitelist
+                if request.url.path not in allowed_without_origin:
+                    # Para outros endpoints, exigir autenticação via token
+                    # Se tiver Authorization header, permitir (request autenticado)
+                    auth_header = request.headers.get("Authorization")
+                    if not auth_header:
+                        return JSONResponse(
+                            status_code=status.HTTP_403_FORBIDDEN,
+                            content={"detail": "Missing Origin or Referer header for unauthenticated request"}
+                        )
 
         # Processar request
         response = await call_next(request)
