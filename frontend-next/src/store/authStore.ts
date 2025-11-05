@@ -23,7 +23,7 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       token: null,
       isAuthenticated: false,
-      isLoading: false,
+      isLoading: true,
 
       login: async (email: string, password: string) => {
         set({ isLoading: true })
@@ -60,8 +60,13 @@ export const useAuthStore = create<AuthState>()(
       },
 
       checkAuth: () => {
-        // Zustand persist will automatically restore state
-        set({ isLoading: false })
+        // Zustand persist will automatically restore state from localStorage
+        // Just set loading to false after hydration
+        const state = useAuthStore.getState()
+        set({
+          isLoading: false,
+          isAuthenticated: !!state.token && !!state.user
+        })
       },
 
       setUser: (user: User | null) => {
