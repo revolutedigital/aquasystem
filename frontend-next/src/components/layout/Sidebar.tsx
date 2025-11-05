@@ -15,6 +15,7 @@ import {
   X,
   Settings,
   Bell,
+  GraduationCap,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Logo } from '@/components/brand/Logo'
@@ -25,6 +26,7 @@ import { useState } from 'react'
 const navigation = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard, id: 'dashboard' },
   { name: 'Alunos', href: '/alunos', icon: Users, id: 'students' },
+  { name: 'Professores', href: '/professores', icon: GraduationCap, id: 'teachers' },
   { name: 'Horários', href: '/horarios', icon: Calendar, id: 'schedules' },
   { name: 'Financeiro', href: '/financeiro', icon: DollarSign, id: 'financial' },
   { name: 'Usuários', href: '/usuarios', icon: UserCog, id: 'users' },

@@ -184,7 +184,8 @@ function HorariosPageContent() {
         loadHorarios()
       } catch (error) {
         console.error('Erro ao excluir horário:', error)
-        toast.error('Erro ao excluir horário')
+        const errorMsg = (error as { response?: { data?: { detail?: string } } }).response?.data?.detail || 'Erro ao excluir horário'
+        toast.error(errorMsg)
       }
     }
   }
@@ -547,9 +548,9 @@ function HorariosPageContent() {
                   <div className="space-y-2">
                     <Label htmlFor="professor">Professor</Label>
                     <Select
-                      value={formData.professor_id?.toString() || ""}
+                      value={formData.professor_id?.toString() || "none"}
                       onValueChange={(value) => {
-                        const profId = value ? parseInt(value) : undefined
+                        const profId = value !== "none" ? parseInt(value) : undefined
                         const prof = professores.find(p => p.id === profId)
                         setFormData({
                           ...formData,
@@ -562,7 +563,7 @@ function HorariosPageContent() {
                         <SelectValue placeholder="Selecione o professor (opcional)" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Nenhum</SelectItem>
+                        <SelectItem value="none">Nenhum</SelectItem>
                         {professores.map(prof => (
                           <SelectItem key={prof.id} value={prof.id.toString()}>
                             {prof.nome} {prof.especialidade && `(${prof.especialidade})`}
