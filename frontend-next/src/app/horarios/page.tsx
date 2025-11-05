@@ -273,10 +273,12 @@ function HorariosPageContent() {
                                   hora_fim: horario.hora_fim || '',
                                   turma: horario.turma || '',
                                   professor: horario.professor || '',
+                                  professor_id: horario.professor_id || undefined,
                                   nivel: horario.nivel || 'Iniciante',
                                   sala_piscina: horario.sala_piscina || '',
                                   capacidade: horario.capacidade_maxima || horario.capacidade || 10,
-                                  alunos_matriculados: horario.alunos_matriculados || 0
+                                  alunos_matriculados: horario.alunos_matriculados || 0,
+                                  fila_espera: horario.fila_espera || 0
                                 })
                                 setIsAddModalOpen(true)
                               }}
