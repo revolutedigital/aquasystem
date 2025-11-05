@@ -328,11 +328,11 @@ function HorariosPageContent() {
           <Card className="p-6 glass border-0 shadow-medium hover:shadow-lg transition-shadow">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <div className={`${cores[horario.nivel as keyof typeof cores]} text-white p-3 rounded-lg`}>
+                <div className={`${cores[(horario.nivel || 'Iniciante') as keyof typeof cores] || 'bg-blue-500'} text-white p-3 rounded-lg`}>
                   <Clock className="h-6 w-6" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-lg">{horario.turma}</h3>
+                  <h3 className="font-semibold text-lg">{horario.turma || 'Sem nome'}</h3>
                   <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
                     <span className="flex items-center gap-1">
                       <Calendar className="h-3 w-3" />
@@ -340,11 +340,11 @@ function HorariosPageContent() {
                     </span>
                     <span className="flex items-center gap-1">
                       <Clock className="h-3 w-3" />
-                      {horario.hora_inicio} - {horario.hora_fim}
+                      {horario.hora_inicio || horario.horario} - {horario.hora_fim || ''}
                     </span>
                     <span className="flex items-center gap-1">
                       <MapPin className="h-3 w-3" />
-                      {horario.sala_piscina}
+                      {horario.sala_piscina || 'Não informado'}
                     </span>
                   </div>
                 </div>
@@ -352,7 +352,7 @@ function HorariosPageContent() {
               <div className="flex items-center gap-4">
                 <div className="text-right">
                   <p className="text-sm text-muted-foreground">Professor</p>
-                  <p className="font-medium">{horario.professor}</p>
+                  <p className="font-medium">{horario.professor || 'Não atribuído'}</p>
                 </div>
                 <div className="text-right">
                   <p className="text-sm text-muted-foreground">Ocupação</p>
