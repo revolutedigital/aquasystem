@@ -71,7 +71,7 @@ const horarios = [
 
 const niveis = ['Iniciante', 'Intermediário', 'Avançado', 'Competição']
 
-const cores = {
+const cores: Record<string, string> = {
   'Iniciante': 'bg-blue-500',
   'Intermediário': 'bg-green-500',
   'Avançado': 'bg-purple-500',
