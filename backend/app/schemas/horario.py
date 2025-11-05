@@ -12,6 +12,8 @@ class HorarioBase(BaseModel):
     horario: time
     capacidade_maxima: int = Field(default=10, ge=1, le=50)
     tipo_aula: str = Field(..., pattern="^(natacao|hidroginastica)$")
+    professor_id: Optional[int] = None
+    fila_espera: int = Field(default=0, ge=0)
 
 
 class HorarioCreate(HorarioBase):
@@ -25,6 +27,8 @@ class HorarioUpdate(BaseModel):
     horario: Optional[time] = None
     capacidade_maxima: Optional[int] = Field(None, ge=1, le=50)
     tipo_aula: Optional[str] = Field(None, pattern="^(natacao|hidroginastica)$")
+    professor_id: Optional[int] = None
+    fila_espera: Optional[int] = Field(None, ge=0)
 
 
 class HorarioResponse(HorarioBase):
@@ -49,6 +53,7 @@ class HorarioComAlunos(HorarioResponse):
     """Schema de Horário incluindo lista de alunos matriculados"""
     alunos: List[AlunoSimplificado] = []
     vagas_disponiveis: int
+    professor_nome: Optional[str] = None
 
     class Config:
         from_attributes = True

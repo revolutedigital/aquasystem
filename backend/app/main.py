@@ -21,10 +21,16 @@ async def lifespan(app: FastAPI):
 
     # Executar migrações
     try:
-        from app.migrate_add_plano_id import migrate
-        migrate()
+        from app.migrate_add_plano_id import migrate as migrate_plano
+        migrate_plano()
     except Exception as e:
-        print(f"⚠️  Aviso ao executar migração: {str(e)}")
+        print(f"⚠️  Aviso ao executar migração plano_id: {str(e)}")
+
+    try:
+        from app.migrate_add_professor import migrate as migrate_professor
+        migrate_professor()
+    except Exception as e:
+        print(f"⚠️  Aviso ao executar migração professor: {str(e)}")
 
     print("✅ Sistema inicializado com sucesso!")
     yield
@@ -184,7 +190,7 @@ print("   ✅ Referrer-Policy")
 print("   ✅ Permissions-Policy")
 
 # Importar e incluir routers
-from app.routes import alunos, pagamentos, horarios, auth, users, planos
+from app.routes import alunos, pagamentos, horarios, auth, users, planos, professores
 
 # Rotas de autenticação e usuários (públicas e protegidas)
 app.include_router(auth.router, prefix="/api", tags=["Autenticação"])
@@ -195,6 +201,7 @@ app.include_router(alunos.router, prefix="/api", tags=["Alunos"])
 app.include_router(pagamentos.router, prefix="/api", tags=["Pagamentos"])
 app.include_router(horarios.router, prefix="/api", tags=["Horários"])
 app.include_router(planos.router, prefix="/api", tags=["Planos"])
+app.include_router(professores.router, prefix="/api", tags=["Professores"])
 
 
 @app.get("/")

@@ -22,6 +22,12 @@ from app.schemas.horario import (
     HorarioComAlunos,
     AlunoSimplificado
 )
+from app.schemas.professor import (
+    ProfessorBase,
+    ProfessorCreate,
+    ProfessorUpdate,
+    ProfessorResponse
+)
 
 __all__ = [
     # Aluno schemas
@@ -41,5 +47,10 @@ __all__ = [
     "HorarioUpdate",
     "HorarioResponse",
     "HorarioComAlunos",
-    "AlunoSimplificado"
+    "AlunoSimplificado",
+    # Professor schemas
+    "ProfessorBase",
+    "ProfessorCreate",
+    "ProfessorUpdate",
+    "ProfessorResponse"
 ]

@@ -7,5 +7,6 @@ from app.models.horario import Horario
 from app.models.turma import AlunoHorario
 from app.models.user import User
 from app.models.plano import Plano
+from app.models.professor import Professor
 
-__all__ = ["Aluno", "Pagamento", "Horario", "AlunoHorario", "User", "Plano"]
+__all__ = ["Aluno", "Pagamento", "Horario", "AlunoHorario", "User", "Plano", "Professor"]

@@ -40,6 +40,8 @@ async def obter_grade_completa(db: Session = Depends(get_db)):
     Obter grade completa de horários com lista de alunos matriculados
     Útil para visualização da grade semanal
     """
+    from app.models.professor import Professor
+
     horarios = db.query(Horario).order_by(Horario.dia_semana, Horario.horario).all()
 
     grade_completa = []
@@ -60,6 +62,13 @@ async def obter_grade_completa(db: Session = Depends(get_db)):
         # Calcular vagas disponíveis
         vagas_disponiveis = horario.capacidade_maxima - len(alunos)
 
+        # Buscar nome do professor
+        professor_nome = None
+        if horario.professor_id:
+            professor = db.query(Professor).filter(Professor.id == horario.professor_id).first()
+            if professor:
+                professor_nome = professor.nome
+
         # Adicionar à grade
         grade_completa.append(HorarioComAlunos(
             id=horario.id,
@@ -67,8 +76,11 @@ async def obter_grade_completa(db: Session = Depends(get_db)):
             horario=horario.horario,
             capacidade_maxima=horario.capacidade_maxima,
             tipo_aula=horario.tipo_aula,
+            professor_id=horario.professor_id,
+            fila_espera=horario.fila_espera,
             alunos=alunos,
-            vagas_disponiveis=vagas_disponiveis
+            vagas_disponiveis=vagas_disponiveis,
+            professor_nome=professor_nome
         ))
 
     return grade_completa
