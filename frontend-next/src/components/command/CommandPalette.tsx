@@ -15,6 +15,7 @@ import {
   Settings,
   CreditCard,
   LogOut,
+  GraduationCap,
 } from 'lucide-react'
 
 interface CommandItem {
@@ -47,6 +48,14 @@ export function CommandPalette() {
       icon: <Users className="h-4 w-4" />,
       action: () => router.push('/alunos'),
       keywords: ['students', 'alunos', 'estudantes'],
+      group: 'Navegação',
+    },
+    {
+      id: 'teachers',
+      label: 'Ver Professores',
+      icon: <GraduationCap className="h-4 w-4" />,
+      action: () => router.push('/professores'),
+      keywords: ['teachers', 'professores', 'instrutores'],
       group: 'Navegação',
     },
     {
