@@ -126,9 +126,9 @@ function ProfessoresPageContent() {
       loadProfessores()
       setIsAddModalOpen(false)
       resetForm()
-    } catch (error: any) {
+    } catch (error) {
       console.error('Erro ao salvar professor:', error)
-      const errorMsg = error.response?.data?.detail || 'Erro ao salvar professor'
+      const errorMsg = (error as { response?: { data?: { detail?: string } } }).response?.data?.detail || 'Erro ao salvar professor'
       toast.error(errorMsg)
     }
   }
@@ -140,9 +140,9 @@ function ProfessoresPageContent() {
       await professoresAPI.delete(id)
       toast.success('Professor removido com sucesso!')
       loadProfessores()
-    } catch (error: any) {
+    } catch (error) {
       console.error('Erro ao deletar professor:', error)
-      const errorMsg = error.response?.data?.detail || 'Erro ao deletar professor'
+      const errorMsg = (error as { response?: { data?: { detail?: string } } }).response?.data?.detail || 'Erro ao deletar professor'
       toast.error(errorMsg)
     }
   }

@@ -5,7 +5,6 @@ import type {
   AlunoUpdateData,
   PagamentoCreateData,
   HorarioCreateData,
-  HorarioUpdateData,
   ProfessorCreateData,
   ProfessorUpdateData
 } from '@/types'
