@@ -46,12 +46,14 @@ interface HorarioDetalhado {
   hora_fim?: string
   turma?: string
   professor?: string
+  professor_id?: number
   nivel?: string
   sala_piscina?: string
   capacidade: number
   capacidade_maxima?: number // Campo do backend
   alunos_matriculados?: number
   tipo_aula?: string
+  fila_espera?: number
 }
 
 const diasSemana = [
