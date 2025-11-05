@@ -34,8 +34,9 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { toast } from 'sonner'
-import { horariosAPI } from '@/lib/api'
+import { horariosAPI, professoresAPI } from '@/lib/api'
 import { EnrollmentDialog } from '@/components/EnrollmentDialog'
+import type { Professor } from '@/types'
 
 interface HorarioDetalhado {
   id: number
@@ -78,6 +79,7 @@ const cores = {
 function HorariosPageContent() {
   const searchParams = useSearchParams()
   const [horariosList, setHorariosList] = useState<HorarioDetalhado[]>([])
+  const [professores, setProfessores] = useState<Professor[]>([])
   const [loading, setLoading] = useState(true)
   const [viewMode, setViewMode] = useState<'week' | 'list'>('week')
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
@@ -91,15 +93,28 @@ function HorariosPageContent() {
     hora_fim: '',
     turma: '',
     professor: '',
+    professor_id: undefined as number | undefined,
     nivel: 'Iniciante',
     sala_piscina: '',
     capacidade: 10,
-    alunos_matriculados: 0
+    alunos_matriculados: 0,
+    fila_espera: 0
   })
 
   useEffect(() => {
     loadHorarios()
+    loadProfessores()
   }, [])
+
+  const loadProfessores = async () => {
+    try {
+      const data = await professoresAPI.list({ ativo: true })
+      setProfessores(data)
+    } catch (error) {
+      console.error('Erro ao carregar professores:', error)
+      toast.error('Erro ao carregar professores')
+    }
+  }
 
   // Check for action parameter from quick actions
   useEffect(() => {
@@ -134,7 +149,9 @@ function HorariosPageContent() {
         dia_semana: formData.dia_semana.toLowerCase(),
         horario: formData.hora_inicio,
         tipo_aula: 'natacao' as 'natacao' | 'hidroginastica',
-        capacidade_maxima: formData.capacidade
+        capacidade_maxima: formData.capacidade,
+        professor_id: formData.professor_id || undefined,
+        fila_espera: formData.fila_espera || 0
       }
 
       console.log('Enviando horário:', horarioData)
@@ -177,10 +194,12 @@ function HorariosPageContent() {
       hora_fim: '',
       turma: '',
       professor: '',
+      professor_id: undefined,
       nivel: 'Iniciante',
       sala_piscina: '',
       capacidade: 10,
-      alunos_matriculados: 0
+      alunos_matriculados: 0,
+      fila_espera: 0
     })
     setSelectedHorario(null)
   }
@@ -520,13 +539,31 @@ function HorariosPageContent() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="professor">Professor*</Label>
-                    <Input
-                      id="professor"
-                      value={formData.professor}
-                      onChange={(e) => setFormData({...formData, professor: e.target.value})}
-                      required
-                    />
+                    <Label htmlFor="professor">Professor</Label>
+                    <Select
+                      value={formData.professor_id?.toString() || ""}
+                      onValueChange={(value) => {
+                        const profId = value ? parseInt(value) : undefined
+                        const prof = professores.find(p => p.id === profId)
+                        setFormData({
+                          ...formData,
+                          professor_id: profId,
+                          professor: prof?.nome || ''
+                        })
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione o professor (opcional)" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">Nenhum</SelectItem>
+                        {professores.map(prof => (
+                          <SelectItem key={prof.id} value={prof.id.toString()}>
+                            {prof.nome} {prof.especialidade && `(${prof.especialidade})`}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="sala_piscina">Piscina/Sala*</Label>
@@ -547,6 +584,18 @@ function HorariosPageContent() {
                       onChange={(e) => setFormData({...formData, capacidade: parseInt(e.target.value)})}
                       required
                     />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="fila_espera">Fila de Espera</Label>
+                    <Input
+                      id="fila_espera"
+                      type="number"
+                      min="0"
+                      value={formData.fila_espera}
+                      onChange={(e) => setFormData({...formData, fila_espera: parseInt(e.target.value) || 0})}
+                      placeholder="0"
+                    />
+                    <p className="text-xs text-muted-foreground">Quantidade de alunos aguardando vaga</p>
                   </div>
                 </div>
                 <div className="flex justify-end gap-3">

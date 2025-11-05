@@ -15,7 +15,8 @@ import {
   Calendar,
   AlertCircle,
   User,
-  ArrowLeft
+  ArrowLeft,
+  MessageCircle
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -146,6 +147,34 @@ function AlunosPageContent() {
       observacoes: ''
     })
     setSelectedAluno(null)
+  }
+
+  const openWhatsApp = (aluno: Aluno, messageType: 'payment' | 'custom' = 'payment') => {
+    if (!aluno.telefone_whatsapp) {
+      toast.error('Aluno não possui WhatsApp cadastrado')
+      return
+    }
+
+    // Remove caracteres não numéricos do telefone
+    const phone = aluno.telefone_whatsapp.replace(/\D/g, '')
+
+    // Formatar número para WhatsApp (Brasil = +55)
+    const formattedPhone = phone.startsWith('55') ? phone : `55${phone}`
+
+    // Mensagem padrão para avisos de mensalidade
+    let message = ''
+    if (messageType === 'payment') {
+      const today = new Date()
+      const monthName = today.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
+      message = `Olá ${aluno.nome_completo.split(' ')[0]}! 👋\n\nEste é um lembrete sobre a mensalidade de ${monthName}.\n\n💰 Valor: R$ ${aluno.valor_mensalidade.toFixed(2)}\n📅 Vencimento: dia ${aluno.dia_vencimento}\n\nCaso já tenha efetuado o pagamento, desconsidere esta mensagem.\n\nQualquer dúvida, estamos à disposição!`
+    }
+
+    // Codificar mensagem para URL
+    const encodedMessage = encodeURIComponent(message)
+
+    // Abrir WhatsApp Web
+    const whatsappURL = `https://wa.me/${formattedPhone}?text=${encodedMessage}`
+    window.open(whatsappURL, '_blank')
   }
 
   const filteredAlunos = alunos.filter(aluno => {
@@ -479,6 +508,16 @@ function AlunosPageContent() {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
+                      {aluno.telefone_whatsapp && (
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          onClick={() => openWhatsApp(aluno, 'payment')}
+                          title="Enviar mensagem WhatsApp"
+                        >
+                          <MessageCircle className="h-4 w-4 text-green-600" />
+                        </Button>
+                      )}
                       <Button
                         size="icon"
                         variant="ghost"

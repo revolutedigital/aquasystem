@@ -38,10 +38,12 @@ export interface Horario {
   dia_semana: string
   horario: string
   tipo_aula: 'natacao' | 'hidroginastica'
-  professor: string
+  professor_id?: number
+  professor_nome?: string
   capacidade_maxima: number
-  alunos: Aluno[]
-  created_at: string
+  fila_espera: number
+  alunos?: Aluno[]
+  vagas_disponiveis?: number
 }
 
 export interface LoginResponse {
@@ -53,12 +55,28 @@ export interface LoginResponse {
 export interface Professor {
   id: number
   nome: string
-  especialidade: string
+  email: string
+  cpf: string
   telefone?: string
+  especialidade?: string  // 'natacao' | 'hidroginastica' | 'ambos'
+  is_active: boolean
+}
+
+export interface ProfessorCreateData {
+  nome: string
+  email: string
+  cpf: string
+  telefone?: string
+  especialidade?: string
+}
+
+export interface ProfessorUpdateData {
+  nome?: string
   email?: string
-  ativo: boolean
-  created_at: string
-  updated_at: string
+  cpf?: string
+  telefone?: string
+  especialidade?: string
+  is_active?: boolean
 }
 
 export interface Turma {
@@ -108,6 +126,17 @@ export interface HorarioCreateData {
   horario: string
   tipo_aula: 'natacao' | 'hidroginastica'
   capacidade_maxima: number
+  professor_id?: number
+  fila_espera?: number
+}
+
+export interface HorarioUpdateData {
+  dia_semana?: string
+  horario?: string
+  tipo_aula?: 'natacao' | 'hidroginastica'
+  capacidade_maxima?: number
+  professor_id?: number
+  fila_espera?: number
 }
 
 export interface Plano {

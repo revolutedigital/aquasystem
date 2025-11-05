@@ -17,6 +17,7 @@ import {
   Clock,
   Award,
   ChevronRight,
+  GraduationCap,
 } from 'lucide-react'
 import { Aluno, Pagamento } from '@/types'
 
@@ -336,7 +337,7 @@ export default function DashboardPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-6">
-              <div className="grid gap-4 md:grid-cols-3">
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 {[
                   {
                     href: '/alunos/novo',
@@ -358,6 +359,13 @@ export default function DashboardPage() {
                     title: 'Grade de Horários',
                     description: 'Gerenciar aulas',
                     color: 'from-purple-500 to-pink-500',
+                  },
+                  {
+                    href: '/professores',
+                    icon: GraduationCap,
+                    title: 'Professores',
+                    description: 'Gerenciar professores',
+                    color: 'from-orange-500 to-red-500',
                   },
                 ].map((action, i) => (
                   <motion.a

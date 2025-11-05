@@ -4,7 +4,10 @@ import type {
   AlunoCreateData,
   AlunoUpdateData,
   PagamentoCreateData,
-  HorarioCreateData
+  HorarioCreateData,
+  HorarioUpdateData,
+  ProfessorCreateData,
+  ProfessorUpdateData
 } from '@/types'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
@@ -74,10 +77,11 @@ export const turmasAPI = {
 }
 
 export const professoresAPI = {
-  list: () => api.get('/api/professores').then(res => res.data),
+  list: (params?: { ativo?: boolean, especialidade?: string }) =>
+    api.get('/api/professores', { params }).then(res => res.data),
   get: (id: number) => api.get(`/api/professores/${id}`).then(res => res.data),
-  create: (data: Record<string, unknown>) => api.post('/api/professores', data).then(res => res.data),
-  update: (id: number, data: Record<string, unknown>) => api.put(`/api/professores/${id}`, data).then(res => res.data),
+  create: (data: ProfessorCreateData) => api.post('/api/professores', data).then(res => res.data),
+  update: (id: number, data: ProfessorUpdateData) => api.put(`/api/professores/${id}`, data).then(res => res.data),
   delete: (id: number) => api.delete(`/api/professores/${id}`).then(res => res.data),
 }
 
