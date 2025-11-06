@@ -14,6 +14,8 @@ export interface Aluno {
   valor_mensalidade: number
   dia_vencimento: number
   data_inicio_contrato: string
+  data_fim_contrato?: string
+  duracao_contrato_meses?: number
   ativo: boolean
   telefone_whatsapp?: string
   observacoes?: string
@@ -96,6 +98,8 @@ export interface AlunoCreateData {
   valor_mensalidade: number
   dia_vencimento: number
   data_inicio_contrato: string
+  data_fim_contrato?: string
+  duracao_contrato_meses?: number
   telefone_whatsapp?: string
   observacoes?: string
 }
@@ -107,6 +111,8 @@ export interface AlunoUpdateData {
   valor_mensalidade?: number
   dia_vencimento?: number
   data_inicio_contrato?: string
+  data_fim_contrato?: string
+  duracao_contrato_meses?: number
   ativo?: boolean
   telefone_whatsapp?: string
   observacoes?: string

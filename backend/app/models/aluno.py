@@ -19,6 +19,8 @@ class Aluno(Base):
     valor_mensalidade = Column(Numeric(10, 2), nullable=False)
     dia_vencimento = Column(Integer, nullable=False)  # 1-31
     data_inicio_contrato = Column(Date, nullable=True)
+    data_fim_contrato = Column(Date, nullable=True)
+    duracao_contrato_meses = Column(Integer, nullable=True, default=12)  # Duração padrão: 12 meses
 
     # Plano associado
     plano_id = Column(Integer, ForeignKey('planos.id'), nullable=True)

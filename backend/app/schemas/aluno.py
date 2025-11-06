@@ -15,6 +15,8 @@ class AlunoBase(BaseModel):
     valor_mensalidade: Decimal = Field(..., ge=0)
     dia_vencimento: int = Field(..., ge=1, le=31)
     data_inicio_contrato: Optional[date] = None
+    data_fim_contrato: Optional[date] = None
+    duracao_contrato_meses: Optional[int] = Field(default=12, ge=1, le=60)
     ativo: bool = True
     telefone_whatsapp: Optional[str] = Field(None, max_length=20)
     observacoes: Optional[str] = None
@@ -33,6 +35,8 @@ class AlunoUpdate(BaseModel):
     valor_mensalidade: Optional[Decimal] = Field(None, ge=0)
     dia_vencimento: Optional[int] = Field(None, ge=1, le=31)
     data_inicio_contrato: Optional[date] = None
+    data_fim_contrato: Optional[date] = None
+    duracao_contrato_meses: Optional[int] = Field(None, ge=1, le=60)
     ativo: Optional[bool] = None
     telefone_whatsapp: Optional[str] = Field(None, max_length=20)
     observacoes: Optional[str] = None

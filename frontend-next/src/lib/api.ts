@@ -63,6 +63,7 @@ export const alunosAPI = {
   update: (id: number, data: AlunoUpdateData) => api.put(`/api/alunos/${id}`, data).then(res => res.data),
   delete: (id: number) => api.delete(`/api/alunos/${id}`).then(res => res.data),
   getInadimplentes: () => api.get('/api/alunos/inadimplentes').then(res => res.data),
+  getContratosExpirando: (dias: number = 30) => api.get('/api/alunos/contratos/expirando', { params: { dias } }).then(res => res.data),
   getPagamentos: (id: number) => api.get(`/api/alunos/${id}/pagamentos`).then(res => res.data),
   getHorarios: (id: number) => api.get(`/api/alunos/${id}/horarios`).then(res => res.data),
 }

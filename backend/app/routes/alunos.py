@@ -93,6 +93,31 @@ async def listar_alunos_inadimplentes(db: Session = Depends(get_db)):
     return alunos_inadimplentes
 
 
+@router.get("/alunos/contratos/expirando", response_model=List[AlunoResponse])
+async def listar_contratos_expirando(
+    dias: int = Query(default=30, ge=1, le=90, description="Dias de antecedência para considerar contrato expirando"),
+    db: Session = Depends(get_db)
+):
+    """
+    Listar alunos cujos contratos estão expirando nos próximos X dias
+    Útil para enviar propostas de renovação proativas
+    """
+    from datetime import date
+
+    hoje = date.today()
+    data_limite = hoje + timedelta(days=dias)
+
+    # Buscar alunos ativos com data_fim_contrato entre hoje e data_limite
+    contratos_expirando = db.query(Aluno).filter(
+        Aluno.ativo == True,
+        Aluno.data_fim_contrato != None,
+        Aluno.data_fim_contrato >= hoje,
+        Aluno.data_fim_contrato <= data_limite
+    ).order_by(Aluno.data_fim_contrato).all()
+
+    return contratos_expirando
+
+
 @router.get("/alunos/{id}", response_model=AlunoResponse)
 async def obter_aluno(id: int, db: Session = Depends(get_db)):
     """Obter aluno por ID"""

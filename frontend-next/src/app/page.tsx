@@ -5,6 +5,7 @@ import { motion } from 'framer-motion'
 import { DashboardLayout } from '@/components/layout/DashboardLayout'
 import { StatCard } from '@/components/ui/stat-card'
 import { RevenueChart } from '@/components/charts/RevenueChart'
+import { ContratosExpirando } from '@/components/dashboard/ContratosExpirando'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { alunosAPI, pagamentosAPI, horariosAPI } from '@/lib/api'
 import {
@@ -322,6 +323,15 @@ export default function DashboardPage() {
             </Card>
           </motion.div>
         </div>
+
+        {/* Contratos Expirando */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+        >
+          <ContratosExpirando />
+        </motion.div>
 
         {/* Quick Actions */}
         <motion.div

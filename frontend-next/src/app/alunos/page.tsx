@@ -67,6 +67,8 @@ function AlunosPageContent() {
     valor_mensalidade: 250,
     dia_vencimento: 10,
     data_inicio_contrato: new Date().toISOString().split('T')[0],
+    data_fim_contrato: '',
+    duracao_contrato_meses: 12,
     telefone_whatsapp: '',
     observacoes: ''
   })
@@ -143,11 +145,26 @@ function AlunosPageContent() {
       valor_mensalidade: 250,
       dia_vencimento: 10,
       data_inicio_contrato: new Date().toISOString().split('T')[0],
+      data_fim_contrato: '',
+      duracao_contrato_meses: 12,
       telefone_whatsapp: '',
       observacoes: ''
     })
     setSelectedAluno(null)
   }
+
+  // Calcular data_fim_contrato automaticamente quando data_inicio ou duracao mudar
+  useEffect(() => {
+    if (formData.data_inicio_contrato && formData.duracao_contrato_meses) {
+      const dataInicio = new Date(formData.data_inicio_contrato)
+      const dataFim = new Date(dataInicio)
+      dataFim.setMonth(dataFim.getMonth() + formData.duracao_contrato_meses)
+      setFormData(prev => ({
+        ...prev,
+        data_fim_contrato: dataFim.toISOString().split('T')[0]
+      }))
+    }
+  }, [formData.data_inicio_contrato, formData.duracao_contrato_meses])
 
   const openWhatsApp = (aluno: Aluno, messageType: 'payment' | 'custom' = 'payment') => {
     if (!aluno.telefone_whatsapp) {
@@ -180,9 +197,26 @@ function AlunosPageContent() {
   const filteredAlunos = alunos.filter(aluno => {
     const matchesSearch = aluno.nome_completo.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          aluno.telefone_whatsapp?.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesFilter = filterStatus === 'all' ||
-                         (filterStatus === 'active' && aluno.ativo) ||
-                         (filterStatus === 'inactive' && !aluno.ativo)
+
+    // Filtro por status
+    let matchesFilter = true
+    if (filterStatus === 'active') {
+      matchesFilter = aluno.ativo
+    } else if (filterStatus === 'inactive') {
+      matchesFilter = !aluno.ativo
+    } else if (filterStatus === 'expiring') {
+      // Contratos expirando nos próximos 30 dias
+      if (aluno.data_fim_contrato) {
+        const hoje = new Date()
+        const dataFim = new Date(aluno.data_fim_contrato)
+        const diffTime = dataFim.getTime() - hoje.getTime()
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+        matchesFilter = diffDays >= 0 && diffDays <= 30
+      } else {
+        matchesFilter = false
+      }
+    }
+
     return matchesSearch && matchesFilter
   })
 
@@ -309,6 +343,34 @@ function AlunosPageContent() {
                     value={formData.data_inicio_contrato}
                     onChange={(e) => setFormData({...formData, data_inicio_contrato: e.target.value})}
                     required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="duracao_contrato_meses">Duração (meses)*</Label>
+                  <Select
+                    value={formData.duracao_contrato_meses.toString()}
+                    onValueChange={(value) => setFormData({...formData, duracao_contrato_meses: parseInt(value)})}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione a duração" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="3">3 meses</SelectItem>
+                      <SelectItem value="6">6 meses</SelectItem>
+                      <SelectItem value="12">12 meses (Anual)</SelectItem>
+                      <SelectItem value="18">18 meses</SelectItem>
+                      <SelectItem value="24">24 meses (2 anos)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="data_fim_contrato">Data Fim (calculado)</Label>
+                  <Input
+                    id="data_fim_contrato"
+                    type="date"
+                    value={formData.data_fim_contrato}
+                    disabled
+                    className="bg-muted"
                   />
                 </div>
                 <div className="col-span-2 space-y-2">
@@ -439,6 +501,7 @@ function AlunosPageContent() {
               <SelectItem value="all">Todos</SelectItem>
               <SelectItem value="active">Ativos</SelectItem>
               <SelectItem value="inactive">Inativos</SelectItem>
+              <SelectItem value="expiring">Contratos Expirando</SelectItem>
             </SelectContent>
           </Select>
           <Button variant="outline" size="icon">
