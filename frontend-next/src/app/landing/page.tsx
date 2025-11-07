@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion'
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import {
   Check,
   ArrowRight,
@@ -12,28 +13,19 @@ import {
   TrendingUp,
   Clock,
   Shield,
-  Smartphone,
   BarChart3,
   Zap,
   Star,
   MessageCircle,
-  FileText,
-  Bell,
   Award,
-  Target,
-  ChevronDown,
   Play,
   X
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 
 export default function LandingPage() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [email, setEmail] = useState('')
-  const [showVideo, setShowVideo] = useState(false)
 
   const features = [
     {
@@ -262,9 +254,11 @@ export default function LandingPage() {
               className="relative"
             >
               <div className="relative rounded-2xl overflow-hidden shadow-2xl border-8 border-white">
-                <img
+                <Image
                   src="/api/placeholder/800/600"
                   alt="Dashboard AquaFlow Pro"
+                  width={800}
+                  height={600}
                   className="w-full h-auto"
                 />
                 {/* Floating Stats */}
@@ -426,7 +420,7 @@ export default function LandingPage() {
                         <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
                       ))}
                     </div>
-                    <p className="text-gray-700 mb-6 italic">"{testimonial.quote}"</p>
+                    <p className="text-gray-700 mb-6 italic">&ldquo;{testimonial.quote}&rdquo;</p>
                     <div className="flex items-center gap-3">
                       <div className="w-12 h-12 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white font-bold">
                         {testimonial.image}

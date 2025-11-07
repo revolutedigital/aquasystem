@@ -32,6 +32,12 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         print(f"⚠️  Aviso ao executar migração professor: {str(e)}")
 
+    try:
+        from app.migrations import run_migrations
+        run_migrations()
+    except Exception as e:
+        print(f"⚠️  Aviso ao executar migrações automáticas: {str(e)}")
+
     print("✅ Sistema inicializado com sucesso!")
     yield
     # Shutdown: cleanup se necessário

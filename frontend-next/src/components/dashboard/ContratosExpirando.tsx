@@ -8,10 +8,8 @@ import { Badge } from '@/components/ui/badge'
 import {
   FileText,
   Calendar,
-  AlertCircle,
   MessageCircle,
-  ChevronRight,
-  Clock
+  ChevronRight
 } from 'lucide-react'
 import { alunosAPI } from '@/lib/api'
 import type { Aluno } from '@/types'
