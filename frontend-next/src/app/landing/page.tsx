@@ -17,9 +17,7 @@ import {
   Zap,
   Star,
   MessageCircle,
-  Award,
-  Play,
-  X
+  Award
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -223,15 +221,6 @@ export default function LandingPage() {
                 >
                   Comece Grátis por 7 Dias
                   <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  onClick={() => setShowVideo(true)}
-                  className="text-lg px-8 py-6 border-2"
-                >
-                  <Play className="mr-2 h-5 w-5" />
-                  Ver Demo
                 </Button>
               </div>
 
