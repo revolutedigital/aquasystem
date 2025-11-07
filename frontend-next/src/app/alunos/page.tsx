@@ -103,11 +103,20 @@ function AlunosPageContent() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
+      // Prepare data by converting empty strings to undefined for optional date fields
+      const submitData = {
+        ...formData,
+        data_fim_contrato: formData.data_fim_contrato || undefined,
+        responsavel: formData.responsavel || undefined,
+        telefone_whatsapp: formData.telefone_whatsapp || undefined,
+        observacoes: formData.observacoes || undefined
+      }
+
       if (selectedAluno) {
-        await alunosAPI.update(selectedAluno.id, formData)
+        await alunosAPI.update(selectedAluno.id, submitData)
         toast.success('Aluno atualizado com sucesso!')
       } else {
-        await alunosAPI.create(formData)
+        await alunosAPI.create(submitData)
         toast.success('Aluno cadastrado com sucesso!')
       }
       loadAlunos()
