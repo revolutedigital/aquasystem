@@ -593,6 +593,8 @@ function AlunosPageContent() {
                             valor_mensalidade: aluno.valor_mensalidade || 250,
                             dia_vencimento: aluno.dia_vencimento || 10,
                             data_inicio_contrato: aluno.data_inicio_contrato || new Date().toISOString().split('T')[0],
+                            data_fim_contrato: aluno.data_fim_contrato || '',
+                            duracao_contrato_meses: aluno.duracao_contrato_meses || 12,
                             telefone_whatsapp: aluno.telefone_whatsapp || '',
                             observacoes: aluno.observacoes || ''
                           })
