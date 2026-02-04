@@ -216,4 +216,31 @@
       transform: rotate(360deg);
     }
   }
+
+  /* Login page wave animations */
+  .animate-wave-slow {
+    animation: wave-translate 8s ease-in-out infinite;
+  }
+
+  .animate-wave-slow-reverse {
+    animation: wave-translate-reverse 10s ease-in-out infinite;
+  }
+
+  @keyframes wave-translate {
+    0%, 100% {
+      transform: translateX(0) translateY(0);
+    }
+    50% {
+      transform: translateX(-20px) translateY(-10px);
+    }
+  }
+
+  @keyframes wave-translate-reverse {
+    0%, 100% {
+      transform: translateX(0) translateY(0);
+    }
+    50% {
+      transform: translateX(20px) translateY(-5px);
+    }
+  }
 }

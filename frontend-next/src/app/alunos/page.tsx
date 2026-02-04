@@ -192,7 +192,8 @@ function AlunosPageContent() {
     if (messageType === 'payment') {
       const today = new Date()
       const monthName = today.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
-      message = `Olá ${aluno.nome_completo.split(' ')[0]}! 👋\n\nEste é um lembrete sobre a mensalidade de ${monthName}.\n\n💰 Valor: R$ ${aluno.valor_mensalidade.toFixed(2)}\n📅 Vencimento: dia ${aluno.dia_vencimento}\n\nCaso já tenha efetuado o pagamento, desconsidere esta mensagem.\n\nQualquer dúvida, estamos à disposição!`
+      const valor = Number(aluno.valor_mensalidade) || 0
+      message = `Olá ${aluno.nome_completo.split(' ')[0]}! 👋\n\nEste é um lembrete sobre a mensalidade de ${monthName}.\n\n💰 Valor: R$ ${valor.toFixed(2)}\n📅 Vencimento: dia ${aluno.dia_vencimento}\n\nCaso já tenha efetuado o pagamento, desconsidere esta mensagem.\n\nQualquer dúvida, estamos à disposição!`
     }
 
     // Codificar mensagem para URL

@@ -54,7 +54,7 @@ Seu contrato de ${aluno.tipo_aula === 'natacao' ? 'natação' : 'hidroginástica
 🎯 Queremos continuar com você na nossa equipe!
 
 Preparamos uma proposta especial de renovação:
-✅ Manutenção do valor atual: R$ ${aluno.valor_mensalidade.toFixed(2)}
+✅ Manutenção do valor atual: R$ ${(Number(aluno.valor_mensalidade) || 0).toFixed(2)}
 ✅ Flexibilidade de horários
 ✅ Acompanhamento personalizado
 
@@ -159,7 +159,7 @@ Preparamos uma proposta especial de renovação:
                         {contrato.data_fim_contrato ? new Date(contrato.data_fim_contrato).toLocaleDateString('pt-BR') : 'Sem data'}
                       </span>
                       <span className="capitalize">{contrato.tipo_aula}</span>
-                      <span>R$ {contrato.valor_mensalidade.toFixed(2)}</span>
+                      <span>R$ {(Number(contrato.valor_mensalidade) || 0).toFixed(2)}</span>
                     </div>
                   </div>
                   <Button
