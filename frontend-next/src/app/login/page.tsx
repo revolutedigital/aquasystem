@@ -219,7 +219,7 @@ export default function LoginPage() {
             className="mt-8 text-center"
           >
             <p className="text-xs text-muted-foreground">
-              © 2024 AquaFlow Pro. Todos os direitos reservados.
+              © 2026 AquaFlow Pro. Todos os direitos reservados.
             </p>
           </motion.div>
         </div>

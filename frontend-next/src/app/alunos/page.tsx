@@ -21,6 +21,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
+import { formatCurrency } from '@/lib/utils'
 import {
   Table,
   TableBody,
@@ -91,8 +92,7 @@ function AlunosPageContent() {
       setLoading(true)
       const data = await alunosAPI.list() // Por padrão só lista alunos ativos
       setAlunos(data)
-    } catch (error) {
-      console.error('Erro ao carregar alunos:', error)
+    } catch {
       toast.error('Erro ao carregar lista de alunos')
       setAlunos([])
     } finally {
@@ -122,8 +122,7 @@ function AlunosPageContent() {
       loadAlunos()
       setIsAddModalOpen(false)
       resetForm()
-    } catch (error) {
-      console.error('Erro ao salvar aluno:', error)
+    } catch {
       toast.error('Erro ao salvar aluno')
     }
   }
@@ -135,7 +134,6 @@ function AlunosPageContent() {
         toast.success('Aluno excluído com sucesso!')
         await loadAlunos()
       } catch (error) {
-        console.error('Erro ao excluir aluno:', error)
         let errorMessage = 'Erro ao excluir aluno'
         if (error && typeof error === 'object' && 'response' in error) {
           const response = error as { response?: { data?: { detail?: string } } }
@@ -193,7 +191,7 @@ function AlunosPageContent() {
       const today = new Date()
       const monthName = today.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
       const valor = Number(aluno.valor_mensalidade) || 0
-      message = `Olá ${aluno.nome_completo.split(' ')[0]}! 👋\n\nEste é um lembrete sobre a mensalidade de ${monthName}.\n\n💰 Valor: R$ ${valor.toFixed(2)}\n📅 Vencimento: dia ${aluno.dia_vencimento}\n\nCaso já tenha efetuado o pagamento, desconsidere esta mensagem.\n\nQualquer dúvida, estamos à disposição!`
+      message = `Olá ${aluno.nome_completo.split(' ')[0]}! 👋\n\nEste é um lembrete sobre a mensalidade de ${monthName}.\n\n💰 Valor: ${formatCurrency(valor)}\n📅 Vencimento: dia ${aluno.dia_vencimento}\n\nCaso já tenha efetuado o pagamento, desconsidere esta mensagem.\n\nQualquer dúvida, estamos à disposição!`
     }
 
     // Codificar mensagem para URL
@@ -240,7 +238,7 @@ function AlunosPageContent() {
       >
         <div className="flex items-start gap-4">
           <Link href="/">
-            <Button variant="outline" size="icon" className="shadow-sm">
+            <Button variant="outline" size="icon" className="shadow-sm" aria-label="Voltar para o início">
               <ArrowLeft className="h-4 w-4" />
             </Button>
           </Link>
@@ -514,7 +512,7 @@ function AlunosPageContent() {
               <SelectItem value="expiring">Contratos Expirando</SelectItem>
             </SelectContent>
           </Select>
-          <Button variant="outline" size="icon">
+          <Button variant="outline" size="icon" aria-label="Baixar lista de alunos">
             <Download className="h-4 w-4" />
           </Button>
         </div>

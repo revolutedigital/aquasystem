@@ -29,12 +29,21 @@ interface RevenueChartProps {
   type?: 'line' | 'area' | 'bar'
 }
 
+interface TooltipPayload {
+  value: number
+  payload: ChartData
+}
+
+interface CustomTooltipProps {
+  active?: boolean
+  payload?: TooltipPayload[]
+}
+
 export function RevenueChart({ data, title, type = 'area' }: RevenueChartProps) {
   // Validação de dados para evitar erros de SVG path
   const chartData = data && data.length > 0 ? data : [{ name: 'Sem dados', value: 0 }]
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const CustomTooltip = ({ active, payload }: any) => {
+  const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
     if (active && payload && payload.length) {
       return (
         <div className="glass rounded-lg p-3 shadow-lg border border-border">

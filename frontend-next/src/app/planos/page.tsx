@@ -18,6 +18,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
+import { formatCurrency } from '@/lib/utils'
 import {
   Dialog,
   DialogContent,
@@ -69,8 +70,7 @@ function PlanosPageContent() {
       setLoading(true)
       const data = await planosAPI.list()
       setPlanos(data)
-    } catch (error) {
-      console.error('Erro ao carregar planos:', error)
+    } catch {
       toast.error('Erro ao carregar planos')
       setPlanos([])
     } finally {
@@ -91,8 +91,7 @@ function PlanosPageContent() {
       loadPlanos()
       setIsAddModalOpen(false)
       resetForm()
-    } catch (error) {
-      console.error('Erro ao salvar plano:', error)
+    } catch {
       toast.error('Erro ao salvar plano')
     }
   }
@@ -103,8 +102,7 @@ function PlanosPageContent() {
         await planosAPI.delete(id)
         toast.success('Plano excluído com sucesso!')
         await loadPlanos()
-      } catch (error) {
-        console.error('Erro ao excluir plano:', error)
+      } catch {
         toast.error('Erro ao excluir plano')
       }
     }
@@ -132,7 +130,7 @@ function PlanosPageContent() {
         className="flex items-start gap-4"
       >
         <Link href="/">
-          <Button variant="outline" size="icon" className="shadow-sm">
+          <Button variant="outline" size="icon" className="shadow-sm" aria-label="Voltar para o início">
             <ArrowLeft className="h-4 w-4" />
           </Button>
         </Link>
@@ -313,7 +311,7 @@ function PlanosPageContent() {
                   </div>
 
                   <div className="text-3xl font-bold text-primary">
-                    R$ {plano.valor_mensal.toFixed(2)}
+                    {formatCurrency(plano.valor_mensal)}
                     <span className="text-sm font-normal text-muted-foreground">/mês</span>
                   </div>
 

@@ -195,8 +195,7 @@ export default function UsuariosPage() {
       setLoading(true)
       const data = await usersAPI.list()
       setUsuarios(data)
-    } catch (error) {
-      console.error('Erro ao carregar usuários:', error)
+    } catch {
       toast.error('Erro ao carregar lista de usuários')
     } finally {
       setLoading(false)
@@ -246,8 +245,7 @@ export default function UsuariosPage() {
       loadUsuarios() // Recarregar lista
       setIsAddModalOpen(false)
       resetForm()
-    } catch (error) {
-      console.error('Erro ao salvar usuário:', error)
+    } catch {
       toast.error('Erro ao salvar usuário')
     }
   }
@@ -275,8 +273,7 @@ export default function UsuariosPage() {
         setPasswordData({ newPassword: '', confirmPassword: '' })
         setSelectedUsuario(null)
       }
-    } catch (error) {
-      console.error('Erro ao alterar senha:', error)
+    } catch {
       toast.error('Erro ao alterar senha')
     }
   }
@@ -287,8 +284,7 @@ export default function UsuariosPage() {
         await usersAPI.delete(id)
         toast.success('Usuário excluído com sucesso!')
         loadUsuarios() // Recarregar lista
-      } catch (error) {
-        console.error('Erro ao excluir usuário:', error)
+      } catch {
         toast.error('Erro ao excluir usuário')
       }
     }
@@ -302,8 +298,7 @@ export default function UsuariosPage() {
         toast.success(`Usuário ${is_active ? 'ativado' : 'desativado'} com sucesso!`)
         loadUsuarios() // Recarregar lista
       }
-    } catch (error) {
-      console.error('Erro ao alterar status:', error)
+    } catch {
       toast.error('Erro ao alterar status do usuário')
     }
   }
@@ -342,7 +337,7 @@ export default function UsuariosPage() {
       >
         <div className="flex items-start gap-4">
           <Link href="/">
-            <Button variant="outline" size="icon" className="shadow-sm">
+            <Button variant="outline" size="icon" className="shadow-sm" aria-label="Voltar para o início">
               <ArrowLeft className="h-4 w-4" />
             </Button>
           </Link>

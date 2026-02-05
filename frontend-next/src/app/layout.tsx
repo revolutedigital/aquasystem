@@ -17,14 +17,30 @@ const poppins = Poppins({
 })
 
 export const metadata: Metadata = {
-  title: 'AquaFlow Pro - Sistema de Gestão Aquática',
-  description: 'Sistema profissional de gestão para centros aquáticos e academias de natação',
-  keywords: ['natação', 'piscina', 'gestão', 'aquático', 'academia'],
+  title: {
+    default: 'AquaFlow Pro - Sistema de Gestão Aquática',
+    template: '%s | AquaFlow Pro',
+  },
+  description: 'Sistema profissional de gestão para centros aquáticos e academias de natação. Controle alunos, horários, pagamentos e professores.',
+  keywords: ['natação', 'piscina', 'gestão', 'aquático', 'academia', 'alunos', 'mensalidade', 'horários'],
   authors: [{ name: 'AquaFlow Pro' }],
+  creator: 'AquaFlow Pro',
+  publisher: 'AquaFlow Pro',
+  robots: {
+    index: true,
+    follow: true,
+  },
   openGraph: {
-    title: 'AquaFlow Pro',
-    description: 'Sistema profissional de gestão aquática',
+    title: 'AquaFlow Pro - Sistema de Gestão Aquática',
+    description: 'Sistema profissional de gestão para centros aquáticos e academias de natação. Controle alunos, horários, pagamentos e professores.',
     type: 'website',
+    locale: 'pt_BR',
+    siteName: 'AquaFlow Pro',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'AquaFlow Pro - Sistema de Gestão Aquática',
+    description: 'Sistema profissional de gestão para centros aquáticos e academias de natação.',
   },
 }
 

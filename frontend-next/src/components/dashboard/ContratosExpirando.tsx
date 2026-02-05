@@ -13,6 +13,7 @@ import {
 } from 'lucide-react'
 import { alunosAPI } from '@/lib/api'
 import type { Aluno } from '@/types'
+import { formatCurrency } from '@/lib/utils'
 import { toast } from 'sonner'
 import Link from 'next/link'
 
@@ -29,8 +30,8 @@ export function ContratosExpirando() {
       setLoading(true)
       const data = await alunosAPI.getContratosExpirando(30) // Próximos 30 dias
       setContratos(data)
-    } catch (error) {
-      console.error('Erro ao carregar contratos:', error)
+    } catch {
+      // Silently fail - contratos list will remain empty
     } finally {
       setLoading(false)
     }
@@ -54,7 +55,7 @@ Seu contrato de ${aluno.tipo_aula === 'natacao' ? 'natação' : 'hidroginástica
 🎯 Queremos continuar com você na nossa equipe!
 
 Preparamos uma proposta especial de renovação:
-✅ Manutenção do valor atual: R$ ${(Number(aluno.valor_mensalidade) || 0).toFixed(2)}
+✅ Manutenção do valor atual: ${formatCurrency(Number(aluno.valor_mensalidade) || 0)}
 ✅ Flexibilidade de horários
 ✅ Acompanhamento personalizado
 
@@ -159,7 +160,7 @@ Preparamos uma proposta especial de renovação:
                         {contrato.data_fim_contrato ? new Date(contrato.data_fim_contrato).toLocaleDateString('pt-BR') : 'Sem data'}
                       </span>
                       <span className="capitalize">{contrato.tipo_aula}</span>
-                      <span>R$ {(Number(contrato.valor_mensalidade) || 0).toFixed(2)}</span>
+                      <span>{formatCurrency(Number(contrato.valor_mensalidade) || 0)}</span>
                     </div>
                   </div>
                   <Button

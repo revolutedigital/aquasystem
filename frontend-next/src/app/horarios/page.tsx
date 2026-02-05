@@ -112,8 +112,7 @@ function HorariosPageContent() {
     try {
       const data = await professoresAPI.list({ ativo: true })
       setProfessores(data)
-    } catch (error) {
-      console.error('Erro ao carregar professores:', error)
+    } catch {
       toast.error('Erro ao carregar professores')
     }
   }
@@ -130,13 +129,9 @@ function HorariosPageContent() {
   const loadHorarios = async () => {
     try {
       setLoading(true)
-      console.log('Carregando horários...')
       const data = await horariosAPI.list()
-      console.log('Horários recebidos:', data)
-      console.log('Total de horários:', data.length)
       setHorariosList(data)
-    } catch (error) {
-      console.error('Erro ao carregar horários:', error)
+    } catch {
       toast.error('Erro ao carregar horários')
       setHorariosList([])
     } finally {
@@ -156,22 +151,17 @@ function HorariosPageContent() {
         fila_espera: formData.fila_espera || 0
       }
 
-      console.log('Enviando horário:', horarioData)
-
       if (selectedHorario) {
         await horariosAPI.update(selectedHorario.id, horarioData)
         toast.success('Horário atualizado com sucesso!')
       } else {
-        const result = await horariosAPI.create(horarioData)
-        console.log('Horário criado:', result)
+        await horariosAPI.create(horarioData)
         toast.success('Horário cadastrado com sucesso!')
       }
-      console.log('Recarregando lista...')
       await loadHorarios()
       setIsAddModalOpen(false)
       resetForm()
-    } catch (error) {
-      console.error('Erro ao salvar horário:', error)
+    } catch {
       toast.error('Erro ao salvar horário')
     }
   }
@@ -183,7 +173,6 @@ function HorariosPageContent() {
         toast.success('Horário excluído com sucesso!')
         loadHorarios()
       } catch (error) {
-        console.error('Erro ao excluir horário:', error)
         const errorMsg = (error as { response?: { data?: { detail?: string } } }).response?.data?.detail || 'Erro ao excluir horário'
         toast.error(errorMsg)
       }
@@ -424,7 +413,7 @@ function HorariosPageContent() {
       >
         <div className="flex items-start gap-4">
           <Link href="/">
-            <Button variant="outline" size="icon" className="shadow-sm">
+            <Button variant="outline" size="icon" className="shadow-sm" aria-label="Voltar para o início">
               <ArrowLeft className="h-4 w-4" />
             </Button>
           </Link>

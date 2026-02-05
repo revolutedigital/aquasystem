@@ -151,8 +151,8 @@ function FinanceiroPageContent() {
         pendente: 0,  // Backend não tem status, então pendente sempre 0
         inadimplentes: alunosData.filter((a: Aluno) => !a.ativo).length
       })
-    } catch (error) {
-      console.error('Erro ao carregar dados:', error)
+    } catch {
+      // Financial data failed to load
     } finally {
       setLoading(false)
     }
@@ -197,8 +197,7 @@ function FinanceiroPageContent() {
       loadData()
       setIsAddModalOpen(false)
       resetForm()
-    } catch (error) {
-      console.error('Erro ao salvar pagamento:', error)
+    } catch {
       toast.error('Erro ao salvar pagamento')
     }
   }
@@ -209,8 +208,7 @@ function FinanceiroPageContent() {
         await pagamentosAPI.delete(id)
         toast.success('Pagamento excluído com sucesso!')
         loadData()
-      } catch (error) {
-        console.error('Erro ao excluir pagamento:', error)
+      } catch {
         toast.error('Erro ao excluir pagamento')
       }
     }
@@ -259,7 +257,7 @@ function FinanceiroPageContent() {
       >
         <div className="flex items-start gap-4">
           <Link href="/">
-            <Button variant="outline" size="icon" className="shadow-sm">
+            <Button variant="outline" size="icon" className="shadow-sm" aria-label="Voltar para o início">
               <ArrowLeft className="h-4 w-4" />
             </Button>
           </Link>
@@ -542,14 +540,14 @@ function FinanceiroPageContent() {
                   <SelectValue placeholder="Ano" />
                 </SelectTrigger>
                 <SelectContent>
-                  {[2023, 2024, 2025].map((year) => (
+                  {[2024, 2025, 2026].map((year) => (
                     <SelectItem key={year} value={year.toString()}>
                       {year}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-              <Button variant="outline" size="icon">
+              <Button variant="outline" size="icon" aria-label="Baixar relatório financeiro">
                 <Download className="h-4 w-4" />
               </Button>
             </div>

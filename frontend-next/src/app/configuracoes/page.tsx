@@ -20,7 +20,7 @@ export default function ConfiguracoesPage() {
         className="flex items-start gap-4"
       >
         <Link href="/">
-          <Button variant="outline" size="icon" className="shadow-sm">
+          <Button variant="outline" size="icon" className="shadow-sm" aria-label="Voltar para o início">
             <ArrowLeft className="h-4 w-4" />
           </Button>
         </Link>

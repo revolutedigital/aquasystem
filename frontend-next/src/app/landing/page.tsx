@@ -588,7 +588,7 @@ export default function LandingPage() {
           </div>
 
           <div className="border-t border-gray-800 pt-8 text-sm text-center">
-            <p>© 2025 AquaFlow Pro. Todos os direitos reservados.</p>
+            <p>© 2026 AquaFlow Pro. Todos os direitos reservados.</p>
           </div>
         </div>
       </footer>

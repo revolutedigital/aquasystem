@@ -146,8 +146,8 @@ export default function DashboardPage() {
         taxaFrequencia: 0, // Removido - não temos dados de frequência real
       })
       setChartData(last6Months)
-    } catch (error) {
-      console.error('Erro ao carregar dados:', error)
+    } catch {
+      // Dashboard data failed to load
     } finally {
       setLoading(false)
     }

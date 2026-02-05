@@ -84,8 +84,7 @@ export function EnrollmentDialog({
       } else {
         setEnrolledAlunos([])
       }
-    } catch (error) {
-      console.error('Error loading enrollment data:', error)
+    } catch {
       toast.error('Erro ao carregar dados de matrícula')
     } finally {
       setLoading(false)
@@ -112,7 +111,6 @@ export function EnrollmentDialog({
       await loadData()
       onEnrollmentChange?.()
     } catch (error) {
-      console.error('Error adding student:', error)
       const errorMsg = (error as { response?: { data?: { detail?: string } } })?.response?.data?.detail || 'Erro ao adicionar aluno ao horário'
       toast.error(errorMsg)
     } finally {
@@ -127,7 +125,6 @@ export function EnrollmentDialog({
       await loadData()
       onEnrollmentChange?.()
     } catch (error) {
-      console.error('Error removing student:', error)
       const errorMsg = (error as { response?: { data?: { detail?: string } } })?.response?.data?.detail || 'Erro ao remover aluno do horário'
       toast.error(errorMsg)
     }

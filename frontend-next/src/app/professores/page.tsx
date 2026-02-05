@@ -70,8 +70,7 @@ function ProfessoresPageContent() {
       setLoading(true)
       const data = await professoresAPI.list()
       setProfessores(data)
-    } catch (error) {
-      console.error('Erro ao carregar professores:', error)
+    } catch {
       toast.error('Erro ao carregar professores')
       setProfessores([])
     } finally {
@@ -127,7 +126,6 @@ function ProfessoresPageContent() {
       setIsAddModalOpen(false)
       resetForm()
     } catch (error) {
-      console.error('Erro ao salvar professor:', error)
       const errorMsg = (error as { response?: { data?: { detail?: string } } }).response?.data?.detail || 'Erro ao salvar professor'
       toast.error(errorMsg)
     }
@@ -141,7 +139,6 @@ function ProfessoresPageContent() {
       toast.success('Professor removido com sucesso!')
       loadProfessores()
     } catch (error) {
-      console.error('Erro ao deletar professor:', error)
       const errorMsg = (error as { response?: { data?: { detail?: string } } }).response?.data?.detail || 'Erro ao deletar professor'
       toast.error(errorMsg)
     }
@@ -217,7 +214,7 @@ function ProfessoresPageContent() {
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-4">
             <Link href="/">
-              <Button variant="ghost" size="icon">
+              <Button variant="ghost" size="icon" aria-label="Voltar para o início">
                 <ArrowLeft className="h-5 w-5" />
               </Button>
             </Link>
